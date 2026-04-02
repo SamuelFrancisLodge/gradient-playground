@@ -512,6 +512,22 @@ export const PRESET_CATALOG: PresetCatalog = {
 			patch: {},
 		},
 		{
+			key: 'palette-madvillain',
+			label: 'Madvillain Orange',
+			description:
+				'Subtle ascending tints and corresponding shades built on a bold base orange.',
+			patch: {
+				backgroundColor: '#0c0502',
+				palette: paletteFromHexes([
+					'#ae370e',
+					'#d14715',
+					'#f15a22',
+					'#f37b4e',
+					'#f69c7a',
+				]),
+			},
+		},
+		{
 			key: 'palette-cyan-amber',
 			label: 'Cyan + Amber',
 			description: 'Balanced cool/warm modern palette.',
