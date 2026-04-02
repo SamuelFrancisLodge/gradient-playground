@@ -74,10 +74,14 @@ export type StudioSettings = {
 	seed: string;
 	seedLocked: boolean;
 	palette: PaletteSwatch[];
+	backgroundColor: string;
 };
 
-export type StudioPatch = Partial<Omit<StudioSettings, 'palette'>> & {
+export type StudioPatch = Partial<
+	Omit<StudioSettings, 'palette' | 'backgroundColor'>
+> & {
 	palette?: PaletteSwatch[];
+	backgroundColor?: string;
 };
 
 export type PresetDefinition = {

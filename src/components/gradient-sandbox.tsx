@@ -31,7 +31,7 @@ const GLOW_BLEND_OPTIONS: Array<{ label: string; value: GlowBlendMode }> = [
 
 type MenuTone = 'dark' | 'light';
 
-type GuideTopicKey = 'workflow' | 'ratios' | 'seed' | 'effects' | 'performance';
+type GuideTopicKey = 'noise' | 'metaball' | 'blend-modes' | 'warp' | 'ratios';
 
 type GuideTopic = {
 	key: GuideTopicKey;
@@ -42,58 +42,55 @@ type GuideTopic = {
 
 const GUIDE_TOPICS: GuideTopic[] = [
 	{
-		key: 'workflow',
-		title: 'Studio Workflow',
+		key: 'noise',
+		title: 'Fine & Coarse Noise',
 		summary:
-			'Use presets first, then fine-tune controls for polish. Save custom sets when a look feels right.',
+			'Digital grain breaks up color banding, keeping the gradient textured and organic.',
 		details: [
-			'Start with Style, Gradient, and Motion presets to establish direction quickly.',
-			'Use Layout controls to tune circle density and radius balance before deep FX work.',
-			'After refining, save custom presets so the same visual language is reusable.',
+			'Noise Frequency: Controls the "size" of the grain. High frequency resembles TV static, while low frequency feels like cloudy film grain.',
+			'Opacity: Usually kept low (e.g., 0.05-0.15) just to dither overlapping colors.',
+			'Coarse Noise layers a larger, bumpier structural noise pattern over the fine grain.',
+		],
+	},
+	{
+		key: 'metaball',
+		title: 'Metaball Physics',
+		summary:
+			'Merges independent moving circles into continuous, gooey blobs using blur and thresholding.',
+		details: [
+			'Melt Blur: Blurs all shapes intensely into a soft fog.',
+			'Melt Threshold: Cuts off transparent edges from the blur, converting the soft overlap into sharp cohesive shapes (the classic "goo" effect).',
+			'The magic happens in the overlap—where two blurred shapes meet, their combined opacity crosses the threshold, snapping them together.',
+		],
+	},
+	{
+		key: 'blend-modes',
+		title: 'Color Blending',
+		summary: 'Blend modes calculate how intersecting shapes combine light.',
+		details: [
+			'Screen: Only brightens. Perfect for natural glowing auras and soft blooms where overlapping shapes lighten each other.',
+			'Color Dodge: Extreme, punchy highlights. Great when combined with neon palettes for an intense electrical feel.',
+			'Normal blending simply stacks colors on top of each other, obscuring what lies beneath.',
+		],
+	},
+	{
+		key: 'warp',
+		title: 'Liquid Distortion',
+		summary: 'Uses SVG turbulence filters to violently warp shape geometry.',
+		details: [
+			'Warp Frequency: Determines the "scale" of the digital ripples. High values create chaotic micro-texture; low values give sweeping liquid curves.',
+			'Warp Amount: The raw intensity of the pull. Warning: High values will shred your shapes.',
+			'Warp Speed transforms the stationary distortion into swirling currents over time.',
 		],
 	},
 	{
 		key: 'ratios',
-		title: 'Gradient Ratios',
-		summary:
-			'Locks preserve selected swatch percentages while unlocked swatches absorb the remaining ratio.',
+		title: 'Color Math',
+		summary: 'Dynamic distribution of color swatches in the mix.',
 		details: [
-			'Type exact percentages for precision while sliders remain fast for rough exploration.',
-			'Lock key anchor colors before experimenting with secondary tones.',
-			'Use Rebalance to distribute only unlocked colors evenly.',
-		],
-	},
-	{
-		key: 'seed',
-		title: 'Deterministic Seed',
-		summary:
-			'Seed values make shape placement and motion repeatable, which is ideal for iteration and sharing.',
-		details: [
-			'When seed lock is on, the same token recreates the same composition.',
-			'Reroll creates a fresh scene while keeping your current control values.',
-			'Use meaningful seed names to track variants during design reviews.',
-		],
-	},
-	{
-		key: 'effects',
-		title: 'Effect Stacking',
-		summary:
-			'Blend a few effects intentionally instead of maxing everything at once.',
-		details: [
-			'Core FX build the base mood; advanced FX should be layered one at a time.',
-			'Depth, fringe, and sweep are strong stylizers and can easily dominate a scene.',
-			'Tweak one effect family at a time to isolate visual changes cleanly.',
-		],
-	},
-	{
-		key: 'performance',
-		title: 'Performance Tuning',
-		summary:
-			'Heavy combinations can increase render cost, especially with high blur and distortion settings.',
-		details: [
-			'Keep circle count and blur values moderate when multiple advanced FX are enabled.',
-			'Disable unused effect groups to recover headroom before final tuning.',
-			'Watch Render status and dial down expensive passes when the scene turns heavy.',
+			'Unlocking a swatch allows it to fluidly absorb any leftover percentage real estate.',
+			'Locking preserves a swatch’s exact weight in the formula, acting as an anchor tone.',
+			'Try isolating 1-2 powerful accent colors in small amounts while leaving the background tones unlocked to float freely.',
 		],
 	},
 ];
@@ -499,7 +496,7 @@ export function GradientSandbox() {
 		return window.localStorage.getItem('gradient-studio.guide-open.v1') === '1';
 	});
 	const [activeGuideTopic, setActiveGuideTopic] =
-		useState<GuideTopicKey>('workflow');
+		useState<GuideTopicKey>('noise');
 	const controlsPanelRef = useRef<HTMLElement | null>(null);
 	const controlsScrollTopRef = useRef(0);
 
@@ -550,7 +547,10 @@ export function GradientSandbox() {
 	);
 
 	return (
-		<main className="relative h-screen w-screen overflow-hidden bg-[#020817] text-slate-100">
+		<main
+			className="relative h-screen w-screen overflow-hidden text-slate-100 transition-colors duration-1000"
+			style={{ backgroundColor: settings.backgroundColor || '#020817' }}
+		>
 			<OrbGradientField
 				circleCount={settings.circleCount}
 				minRadius={settings.minRadius}
@@ -815,13 +815,13 @@ export function GradientSandbox() {
 
 						<div className="space-y-4 pb-2">
 							<PanelSection
-								title="Style"
+								title="Atmosphere"
 								subtitle="Pick the visual feel and motion behavior; color is controlled separately"
 								tone={menuTone}
 								titleHint="High-level look and movement direction. Keep this broad, then fine-tune below."
 							>
 								<GlobalProfileControl
-									title="Style Preset"
+									title="Atmosphere Theme"
 									subtitle="Affects look, animation, and effects without changing palette colors"
 									quickHint="Fast visual mood selector without touching your gradient colors."
 									group="style"
@@ -846,14 +846,14 @@ export function GradientSandbox() {
 
 							<PanelSection
 								title="Gradient and Seed"
-								subtitle="Choose a gradient preset, or Off to keep your current colors"
+								subtitle="Choose a gradient theme, or Off to keep your current colors"
 								tone={menuTone}
 								titleHint="Use tooltips for quick actions. Open Concept Guide for ratio locks and seed strategy details."
 							>
 								<div className="grid gap-3 sm:grid-cols-2">
 									<GlobalProfileControl
-										title="Gradient Preset"
-										subtitle="Off, curated gradient presets, or custom"
+										title="Gradient Theme"
+										subtitle="Off, curated color themes, or custom"
 										quickHint="Pick a color direction instantly, then refine swatches below."
 										group="palette"
 										presetCatalog={presetCatalog}
@@ -862,8 +862,8 @@ export function GradientSandbox() {
 										tone={menuTone}
 									/>
 									<GlobalProfileControl
-										title="Seed Preset"
-										subtitle="Deterministic seed strategy and lock behavior"
+										title="Seed Strategy"
+										subtitle="Deterministic seed configuration"
 										quickHint="Controls repeatability so the same seed recreates the same scene."
 										group="seed"
 										presetCatalog={presetCatalog}
@@ -969,7 +969,7 @@ export function GradientSandbox() {
 							>
 								<div className="grid gap-3 sm:grid-cols-2">
 									<GlobalProfileControl
-										title="Layout Preset"
+										title="Layout Configuration"
 										subtitle="Density and radius distribution"
 										quickHint="Fast composition tuning for circle count and radius balance."
 										group="layout"
@@ -979,7 +979,7 @@ export function GradientSandbox() {
 										tone={menuTone}
 									/>
 									<GlobalProfileControl
-										title="Motion Preset"
+										title="Motion Profile"
 										subtitle="Animation energy and drift cadence"
 										quickHint="Switch between Off and animated movement profiles quickly."
 										group="motion"

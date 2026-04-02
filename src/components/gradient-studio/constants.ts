@@ -102,6 +102,7 @@ export const DEFAULT_STUDIO_SETTINGS: StudioSettings = {
 	seed: 'studio-default-seed',
 	seedLocked: true,
 	palette: BASE_PALETTE,
+	backgroundColor: '#020617',
 };
 
 export const PRESET_CATALOG: PresetCatalog = {
@@ -515,6 +516,7 @@ export const PRESET_CATALOG: PresetCatalog = {
 			label: 'Cyan + Amber',
 			description: 'Balanced cool/warm modern palette.',
 			patch: {
+				backgroundColor: '#06b6d4',
 				palette: paletteFromHexes([
 					'#06b6d4',
 					'#22d3ee',
@@ -529,6 +531,7 @@ export const PRESET_CATALOG: PresetCatalog = {
 			label: 'Ocean',
 			description: 'Deep water blues and aqua tones.',
 			patch: {
+				backgroundColor: '#1e3a8a',
 				palette: paletteFromHexes([
 					'#1e3a8a',
 					'#1d4ed8',
@@ -543,6 +546,7 @@ export const PRESET_CATALOG: PresetCatalog = {
 			label: 'Solar Flare',
 			description: 'Bright warm tones for energetic visuals.',
 			patch: {
+				backgroundColor: '#b91c1c',
 				palette: paletteFromHexes([
 					'#b91c1c',
 					'#ef4444',
@@ -557,6 +561,7 @@ export const PRESET_CATALOG: PresetCatalog = {
 			label: 'Forest Mist',
 			description: 'Natural greens and dark contrast.',
 			patch: {
+				backgroundColor: '#14532d',
 				palette: paletteFromHexes([
 					'#14532d',
 					'#15803d',
@@ -571,6 +576,7 @@ export const PRESET_CATALOG: PresetCatalog = {
 			label: 'Neon Pop',
 			description: 'High saturation stylized palette.',
 			patch: {
+				backgroundColor: '#06b6d4',
 				palette: paletteFromHexes([
 					'#06b6d4',
 					'#22d3ee',
@@ -585,6 +591,7 @@ export const PRESET_CATALOG: PresetCatalog = {
 			label: 'Aurora Night',
 			description: 'Deep night blues with electric aurora accents.',
 			patch: {
+				backgroundColor: '#0b1026',
 				palette: paletteFromHexes([
 					'#0b1026',
 					'#1d4ed8',
@@ -599,6 +606,7 @@ export const PRESET_CATALOG: PresetCatalog = {
 			label: 'Lava Lux',
 			description: 'Hot ember oranges with bright gold and ember pink.',
 			patch: {
+				backgroundColor: '#7f1d1d',
 				palette: paletteFromHexes([
 					'#7f1d1d',
 					'#dc2626',
@@ -613,6 +621,7 @@ export const PRESET_CATALOG: PresetCatalog = {
 			label: 'Desert Dusk',
 			description: 'Muted warm earth tones with dusk violet contrast.',
 			patch: {
+				backgroundColor: '#7c2d12',
 				palette: paletteFromHexes([
 					'#7c2d12',
 					'#c2410c',
@@ -627,6 +636,7 @@ export const PRESET_CATALOG: PresetCatalog = {
 			label: 'Glacier Fade',
 			description: 'Cold arctic whites and frosted blue gradients.',
 			patch: {
+				backgroundColor: '#ecfeff',
 				palette: paletteFromHexes([
 					'#ecfeff',
 					'#cffafe',
@@ -641,6 +651,7 @@ export const PRESET_CATALOG: PresetCatalog = {
 			label: 'Rose Garden',
 			description: 'Soft florals with warm petals and fresh green accents.',
 			patch: {
+				backgroundColor: '#fbcfe8',
 				palette: paletteFromHexes([
 					'#fbcfe8',
 					'#f472b6',
@@ -655,6 +666,7 @@ export const PRESET_CATALOG: PresetCatalog = {
 			label: 'Synthwave',
 			description: 'Retro magenta, electric blue, and sunset orange.',
 			patch: {
+				backgroundColor: '#312e81',
 				palette: paletteFromHexes([
 					'#312e81',
 					'#4338ca',
@@ -669,6 +681,7 @@ export const PRESET_CATALOG: PresetCatalog = {
 			label: 'Citrus Punch',
 			description: 'Lime and citrus tones with high-energy warm accents.',
 			patch: {
+				backgroundColor: '#14532d',
 				palette: paletteFromHexes([
 					'#14532d',
 					'#84cc16',
@@ -683,6 +696,7 @@ export const PRESET_CATALOG: PresetCatalog = {
 			label: 'Ink and Cream',
 			description: 'Editorial neutrals from deep ink to warm paper cream.',
 			patch: {
+				backgroundColor: '#020617',
 				palette: paletteFromHexes([
 					'#020617',
 					'#334155',
@@ -698,6 +712,7 @@ export const PRESET_CATALOG: PresetCatalog = {
 			description:
 				'Playful high-saturation pink, orange, yellow, and cyan blend.',
 			patch: {
+				backgroundColor: '#ec4899',
 				palette: paletteFromHexes([
 					'#ec4899',
 					'#fb7185',
@@ -712,6 +727,7 @@ export const PRESET_CATALOG: PresetCatalog = {
 			label: 'Midnight Mint',
 			description: 'Dark midnight base with cool mint transitions.',
 			patch: {
+				backgroundColor: '#020617',
 				palette: paletteFromHexes([
 					'#020617',
 					'#0f172a',
@@ -726,6 +742,7 @@ export const PRESET_CATALOG: PresetCatalog = {
 			label: 'Volcanic Ash',
 			description: 'Smoky charcoals with ember reds and glowing orange.',
 			patch: {
+				backgroundColor: '#111827',
 				palette: paletteFromHexes([
 					'#111827',
 					'#374151',
@@ -740,6 +757,7 @@ export const PRESET_CATALOG: PresetCatalog = {
 			label: 'Arctic Pastel',
 			description: 'Icy pastels with soft blue and pink accents.',
 			patch: {
+				backgroundColor: '#e0f2fe',
 				palette: paletteFromHexes([
 					'#e0f2fe',
 					'#bae6fd',
@@ -754,6 +772,7 @@ export const PRESET_CATALOG: PresetCatalog = {
 			label: 'Rainforest Deep',
 			description: 'Dense jungle greens with moss and dark canopy contrast.',
 			patch: {
+				backgroundColor: '#052e16',
 				palette: paletteFromHexes([
 					'#052e16',
 					'#14532d',
@@ -768,6 +787,7 @@ export const PRESET_CATALOG: PresetCatalog = {
 			label: 'Retro Arcade',
 			description: 'Electric magenta, cyan, and yellow with deep violet base.',
 			patch: {
+				backgroundColor: '#1e1b4b',
 				palette: paletteFromHexes([
 					'#1e1b4b',
 					'#7c3aed',
@@ -782,6 +802,7 @@ export const PRESET_CATALOG: PresetCatalog = {
 			label: 'Lilac Dream',
 			description: 'Lavender gradients with rosy and sky highlights.',
 			patch: {
+				backgroundColor: '#312e81',
 				palette: paletteFromHexes([
 					'#312e81',
 					'#6366f1',
@@ -796,6 +817,7 @@ export const PRESET_CATALOG: PresetCatalog = {
 			label: 'Royal Gold',
 			description: 'Navy and royal blues balanced with rich gold highlights.',
 			patch: {
+				backgroundColor: '#0f172a',
 				palette: paletteFromHexes([
 					'#0f172a',
 					'#1d4ed8',
@@ -810,6 +832,7 @@ export const PRESET_CATALOG: PresetCatalog = {
 			label: 'Coastal Sunrise',
 			description: 'Sea blue mixed with coral sunrise tones.',
 			patch: {
+				backgroundColor: '#0c4a6e',
 				palette: paletteFromHexes([
 					'#0c4a6e',
 					'#0284c7',
@@ -824,6 +847,7 @@ export const PRESET_CATALOG: PresetCatalog = {
 			label: 'Copper Oxide',
 			description: 'Weathered copper oranges and teal patina contrast.',
 			patch: {
+				backgroundColor: '#7c2d12',
 				palette: paletteFromHexes([
 					'#7c2d12',
 					'#c2410c',
@@ -838,6 +862,7 @@ export const PRESET_CATALOG: PresetCatalog = {
 			label: 'Slate Mono',
 			description: 'Neutral minimalist grayscale.',
 			patch: {
+				backgroundColor: '#f8fafc',
 				palette: paletteFromHexes([
 					'#f8fafc',
 					'#94a3b8',
