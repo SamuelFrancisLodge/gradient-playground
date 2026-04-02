@@ -29,10 +29,10 @@ export function PaletteEditor({
 }: PaletteEditorProps) {
 	const isLight = tone === 'light';
 	const cardClass = isLight
-		? 'rounded-xl border border-slate-300 bg-white/85 p-3'
+		? 'rounded-xl border border-amber-200 bg-[#fffaf2]/90 p-3'
 		: 'rounded-xl border border-white/20 bg-slate-950/55 p-3';
-	const mutedTextClass = isLight ? 'text-slate-600' : 'text-slate-300';
-	const valueTextClass = isLight ? 'text-slate-900' : 'text-white/95';
+	const mutedTextClass = isLight ? 'text-amber-800/85' : 'text-slate-300';
+	const valueTextClass = isLight ? 'text-amber-950' : 'text-white/95';
 	const actionButtonBase =
 		'cursor-pointer rounded-xl px-3 py-2 text-xs font-semibold uppercase tracking-[0.14em] transition';
 
@@ -54,7 +54,7 @@ export function PaletteEditor({
 									}
 									className={`h-9 w-9 cursor-pointer rounded-md border p-0 ${
 										isLight
-											? 'border-slate-300 bg-white'
+											? 'border-amber-200 bg-[#fffef8]'
 											: 'border-white/25 bg-transparent'
 									}`}
 								/>
@@ -79,13 +79,18 @@ export function PaletteEditor({
 								<button
 									type="button"
 									onClick={() => onToggleLock(swatch.id, !swatch.locked)}
+									title={
+										swatch.locked
+											? 'Unlock this swatch so it can rebalance automatically.'
+											: 'Lock this swatch to keep its exact ratio while editing others.'
+									}
 									className={`cursor-pointer rounded-lg border px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] transition ${
 										swatch.locked
 											? isLight
 												? 'border-indigo-400 bg-indigo-500/10 text-indigo-700 hover:bg-indigo-500/15'
 												: 'border-indigo-300/40 bg-indigo-500/15 text-indigo-100 hover:bg-indigo-500/25'
 											: isLight
-												? 'border-slate-300 bg-slate-100 text-slate-700 hover:bg-slate-200'
+												? 'border-amber-200 bg-[#fff0dc] text-amber-900 hover:bg-[#ffe7ca]'
 												: 'border-white/20 bg-white/5 text-slate-200 hover:bg-white/10'
 									}`}
 								>
@@ -94,6 +99,7 @@ export function PaletteEditor({
 								<button
 									type="button"
 									onClick={() => onRemove(swatch.id)}
+									title="Remove this swatch from the gradient palette."
 									className={`cursor-pointer rounded-lg border px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] transition ${
 										isLight
 											? 'border-rose-300 bg-rose-100/80 text-rose-700 hover:bg-rose-200/90'
@@ -108,7 +114,7 @@ export function PaletteEditor({
 						<div className="mt-3">
 							<div
 								className={`mb-1.5 flex items-center justify-between text-[11px] uppercase tracking-[0.14em] ${
-									isLight ? 'text-slate-600' : 'text-slate-300/75'
+									isLight ? 'text-amber-800/85' : 'text-slate-300/75'
 								}`}
 							>
 								<span>Weight</span>
@@ -133,7 +139,7 @@ export function PaletteEditor({
 								<label
 									className={`flex items-center gap-1 rounded-lg border px-2 py-1 ${
 										isLight
-											? 'border-slate-300 bg-white text-slate-700'
+											? 'border-amber-200 bg-[#fffdf7] text-amber-900'
 											: 'border-white/20 bg-slate-900/70 text-slate-200'
 									}`}
 								>
@@ -163,6 +169,7 @@ export function PaletteEditor({
 				<button
 					type="button"
 					onClick={onAdd}
+					title="Add a new gradient swatch to the palette."
 					className={`${actionButtonBase} ${
 						isLight
 							? 'border border-emerald-300 bg-emerald-100/80 text-emerald-700 hover:bg-emerald-200/80'
@@ -174,9 +181,10 @@ export function PaletteEditor({
 				<button
 					type="button"
 					onClick={onRebalance}
+					title="Evenly rebalance all unlocked swatch ratios."
 					className={`${actionButtonBase} ${
 						isLight
-							? 'border border-slate-300 bg-slate-100 text-slate-700 hover:bg-slate-200'
+							? 'border border-amber-200 bg-[#fff0dc] text-amber-900 hover:bg-[#ffe7ca]'
 							: 'border border-white/20 bg-white/5 text-white hover:bg-white/10'
 					}`}
 				>
@@ -185,9 +193,10 @@ export function PaletteEditor({
 				<button
 					type="button"
 					onClick={onSaveCustom}
+					title="Save the current gradient swatches as your custom palette preset."
 					className={`${actionButtonBase} ${
 						isLight
-							? 'border border-cyan-300 bg-cyan-100 text-cyan-700 hover:bg-cyan-200'
+							? 'border border-cyan-300 bg-cyan-100/85 text-cyan-800 hover:bg-cyan-200/85'
 							: 'border border-cyan-300/30 bg-cyan-500/15 text-cyan-100 hover:bg-cyan-500/25'
 					}`}
 				>

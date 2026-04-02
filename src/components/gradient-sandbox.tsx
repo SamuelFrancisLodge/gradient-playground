@@ -31,9 +31,223 @@ const GLOW_BLEND_OPTIONS: Array<{ label: string; value: GlowBlendMode }> = [
 
 type MenuTone = 'dark' | 'light';
 
+type GuideTopicKey = 'workflow' | 'ratios' | 'seed' | 'effects' | 'performance';
+
+type GuideTopic = {
+	key: GuideTopicKey;
+	title: string;
+	summary: string;
+	details: string[];
+};
+
+const GUIDE_TOPICS: GuideTopic[] = [
+	{
+		key: 'workflow',
+		title: 'Studio Workflow',
+		summary:
+			'Use presets first, then fine-tune controls for polish. Save custom sets when a look feels right.',
+		details: [
+			'Start with Style, Gradient, and Motion presets to establish direction quickly.',
+			'Use Layout controls to tune circle density and radius balance before deep FX work.',
+			'After refining, save custom presets so the same visual language is reusable.',
+		],
+	},
+	{
+		key: 'ratios',
+		title: 'Gradient Ratios',
+		summary:
+			'Locks preserve selected swatch percentages while unlocked swatches absorb the remaining ratio.',
+		details: [
+			'Type exact percentages for precision while sliders remain fast for rough exploration.',
+			'Lock key anchor colors before experimenting with secondary tones.',
+			'Use Rebalance to distribute only unlocked colors evenly.',
+		],
+	},
+	{
+		key: 'seed',
+		title: 'Deterministic Seed',
+		summary:
+			'Seed values make shape placement and motion repeatable, which is ideal for iteration and sharing.',
+		details: [
+			'When seed lock is on, the same token recreates the same composition.',
+			'Reroll creates a fresh scene while keeping your current control values.',
+			'Use meaningful seed names to track variants during design reviews.',
+		],
+	},
+	{
+		key: 'effects',
+		title: 'Effect Stacking',
+		summary:
+			'Blend a few effects intentionally instead of maxing everything at once.',
+		details: [
+			'Core FX build the base mood; advanced FX should be layered one at a time.',
+			'Depth, fringe, and sweep are strong stylizers and can easily dominate a scene.',
+			'Tweak one effect family at a time to isolate visual changes cleanly.',
+		],
+	},
+	{
+		key: 'performance',
+		title: 'Performance Tuning',
+		summary:
+			'Heavy combinations can increase render cost, especially with high blur and distortion settings.',
+		details: [
+			'Keep circle count and blur values moderate when multiple advanced FX are enabled.',
+			'Disable unused effect groups to recover headroom before final tuning.',
+			'Watch Render status and dial down expensive passes when the scene turns heavy.',
+		],
+	},
+];
+
+function TooltipBadge({
+	text,
+	tone = 'dark',
+}: {
+	text?: string;
+	tone?: MenuTone;
+}) {
+	if (!text) {
+		return null;
+	}
+
+	const isLight = tone === 'light';
+
+	return (
+		<span
+			title={text}
+			aria-label={text}
+			className={`inline-flex h-4 w-4 items-center justify-center rounded-full text-[10px] font-bold leading-none ${
+				isLight
+					? 'border border-amber-300 bg-amber-100 text-amber-800'
+					: 'border border-cyan-300/35 bg-cyan-500/15 text-cyan-100'
+			}`}
+		>
+			?
+		</span>
+	);
+}
+
+type ConceptGuidePanelProps = {
+	tone: MenuTone;
+	activeTopic: GuideTopicKey;
+	onSelectTopic: (topic: GuideTopicKey) => void;
+	onClose: () => void;
+	compact?: boolean;
+};
+
+function ConceptGuidePanel({
+	tone,
+	activeTopic,
+	onSelectTopic,
+	onClose,
+	compact = false,
+}: ConceptGuidePanelProps) {
+	const isLight = tone === 'light';
+	const topic =
+		GUIDE_TOPICS.find((entry) => entry.key === activeTopic) ?? GUIDE_TOPICS[0];
+
+	return (
+		<div
+			className={`rounded-3xl border p-4 shadow-[0_20px_60px_rgba(0,0,0,0.3)] backdrop-blur-xl transition-colors duration-500 ${
+				isLight
+					? 'border-amber-200/90 bg-[#fff9ef]/93 text-amber-950 shadow-[0_16px_44px_rgba(109,66,17,0.18)]'
+					: 'border-white/18 bg-slate-950/82 text-slate-100'
+			}`}
+		>
+			<div className="mb-3 flex items-start justify-between gap-3">
+				<div>
+					<p
+						className={`text-[10px] font-semibold uppercase tracking-[0.2em] ${
+							isLight ? 'text-cyan-700' : 'text-cyan-100/85'
+						}`}
+					>
+						Concept Guide
+					</p>
+					<p
+						className={`mt-1 text-xs ${
+							isLight ? 'text-amber-800/85' : 'text-slate-300/75'
+						}`}
+					>
+						Use tooltips for tiny hints and this panel for deeper context.
+					</p>
+				</div>
+				<button
+					type="button"
+					onClick={onClose}
+					title="Hide concept guide"
+					className={`rounded-full border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] transition ${
+						isLight
+							? 'border-amber-300 bg-[#fff1df] text-amber-900 hover:bg-[#ffe8cf]'
+							: 'border-white/25 bg-white/5 text-white/85 hover:bg-white/10'
+					}`}
+				>
+					Hide
+				</button>
+			</div>
+
+			<div
+				className={`grid gap-2 ${compact ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-1'}`}
+			>
+				{GUIDE_TOPICS.map((entry) => {
+					const isActive = entry.key === topic.key;
+
+					return (
+						<button
+							key={entry.key}
+							type="button"
+							onClick={() => onSelectTopic(entry.key)}
+							title={entry.summary}
+							className={`w-full rounded-xl border px-3 py-2 text-left text-xs font-semibold uppercase tracking-widest transition ${
+								isActive
+									? isLight
+										? 'border-cyan-400 bg-cyan-100/80 text-cyan-900'
+										: 'border-cyan-300/45 bg-cyan-500/20 text-cyan-100'
+									: isLight
+										? 'border-amber-200 bg-[#fffdf7] text-amber-900 hover:bg-[#fff3e2]'
+										: 'border-white/15 bg-slate-900/55 text-slate-100 hover:bg-slate-900/75'
+							}`}
+						>
+							{entry.title}
+						</button>
+					);
+				})}
+			</div>
+
+			<div
+				className={`mt-3 rounded-2xl border p-3 ${
+					isLight
+						? 'border-amber-200/80 bg-[#fff4e6]'
+						: 'border-white/12 bg-slate-900/62'
+				}`}
+			>
+				<p className="text-sm font-semibold">{topic.title}</p>
+				<p
+					className={`mt-1 text-xs leading-relaxed ${
+						isLight ? 'text-amber-900/85' : 'text-slate-300/80'
+					}`}
+				>
+					{topic.summary}
+				</p>
+				<ul
+					className={`mt-2 space-y-1.5 text-xs ${
+						isLight ? 'text-amber-900/85' : 'text-slate-200/85'
+					}`}
+				>
+					{topic.details.map((detail) => (
+						<li key={detail} className="flex items-start gap-2 leading-relaxed">
+							<span className="pt-px">-</span>
+							<span>{detail}</span>
+						</li>
+					))}
+				</ul>
+			</div>
+		</div>
+	);
+}
+
 type EffectPresetCardProps = {
 	title: string;
 	subtitle: string;
+	quickHint?: string;
 	effectKey: EffectPresetKey;
 	presetCatalog: EffectPresetCatalog;
 	presetSelections: EffectPresetSelectionState;
@@ -46,6 +260,7 @@ type EffectPresetCardProps = {
 type GlobalProfileControlProps = {
 	title: string;
 	subtitle: string;
+	quickHint?: string;
 	group: PresetGroupKey;
 	presetCatalog: PresetCatalog;
 	presetSelections: PresetSelectionState;
@@ -58,6 +273,7 @@ type GlobalProfileControlProps = {
 function GlobalProfileControl({
 	title,
 	subtitle,
+	quickHint,
 	group,
 	presetCatalog,
 	presetSelections,
@@ -76,20 +292,23 @@ function GlobalProfileControl({
 		<div
 			className={`rounded-xl border p-4 transition-colors duration-500 ${
 				isLight
-					? 'border-slate-300 bg-white/85'
+					? 'border-amber-200 bg-[#fffaf2]/90'
 					: 'border-white/12 bg-slate-950/40'
 			}`}
 		>
-			<p
-				className={`text-[10px] uppercase tracking-[0.15em] ${
-					isLight ? 'text-cyan-700' : 'text-cyan-100/85'
-				}`}
-			>
-				{title}
-			</p>
+			<div className="flex items-center gap-2">
+				<p
+					className={`text-[10px] uppercase tracking-[0.15em] ${
+						isLight ? 'text-cyan-700' : 'text-cyan-100/85'
+					}`}
+				>
+					{title}
+				</p>
+				<TooltipBadge text={quickHint} tone={tone} />
+			</div>
 			<p
 				className={`mt-1.5 text-xs ${
-					isLight ? 'text-slate-600' : 'text-slate-300/75'
+					isLight ? 'text-amber-800/85' : 'text-slate-300/75'
 				}`}
 			>
 				{subtitle}
@@ -101,6 +320,7 @@ function GlobalProfileControl({
 			>
 				<SelectInput
 					hideLabel
+					tone={tone}
 					value={selectedKey}
 					onChange={(value) => onApplyProfile(group, value)}
 					options={[
@@ -115,9 +335,10 @@ function GlobalProfileControl({
 					<button
 						type="button"
 						onClick={() => onSaveProfile(group)}
+						title="Save the current values as your custom preset for this group."
 						className={`cursor-pointer rounded-xl border px-3 py-2 text-xs font-semibold uppercase tracking-[0.12em] transition ${
 							isLight
-								? 'border-cyan-300 bg-cyan-100 text-cyan-700 hover:bg-cyan-200'
+								? 'border-cyan-300 bg-cyan-100/85 text-cyan-800 hover:bg-cyan-200/85'
 								: 'border-cyan-300/30 bg-cyan-500/15 text-cyan-100 hover:bg-cyan-500/25'
 						}`}
 					>
@@ -127,7 +348,7 @@ function GlobalProfileControl({
 			</div>
 			<p
 				className={`mt-3 text-xs ${
-					isLight ? 'text-slate-600' : 'text-slate-300/75'
+					isLight ? 'text-amber-800/85' : 'text-slate-300/75'
 				}`}
 			>
 				{selectedKey === CUSTOM_PRESET_KEY
@@ -141,6 +362,7 @@ function GlobalProfileControl({
 function EffectPresetCard({
 	title,
 	subtitle,
+	quickHint,
 	effectKey,
 	presetCatalog,
 	presetSelections,
@@ -159,21 +381,24 @@ function EffectPresetCard({
 		<div
 			className={`rounded-xl border p-4 transition-colors duration-500 ${
 				isLight
-					? 'border-slate-300 bg-white/85'
+					? 'border-amber-200 bg-[#fffaf2]/90'
 					: 'border-white/12 bg-slate-950/40'
 			}`}
 		>
 			<div className="mb-4">
-				<p
-					className={`text-[10px] uppercase tracking-[0.15em] ${
-						isLight ? 'text-cyan-700' : 'text-cyan-100/85'
-					}`}
-				>
-					{title}
-				</p>
+				<div className="flex items-center gap-2">
+					<p
+						className={`text-[10px] uppercase tracking-[0.15em] ${
+							isLight ? 'text-cyan-700' : 'text-cyan-100/85'
+						}`}
+					>
+						{title}
+					</p>
+					<TooltipBadge text={quickHint} tone={tone} />
+				</div>
 				<p
 					className={`mt-1.5 text-xs ${
-						isLight ? 'text-slate-600' : 'text-slate-300/75'
+						isLight ? 'text-amber-800/85' : 'text-slate-300/75'
 					}`}
 				>
 					{subtitle}
@@ -182,6 +407,7 @@ function EffectPresetCard({
 			<div className="grid grid-cols-[minmax(0,1fr)_auto] gap-2">
 				<SelectInput
 					hideLabel
+					tone={tone}
 					value={selectedKey}
 					onChange={(value) => onApplyPreset(effectKey, value)}
 					options={[
@@ -195,9 +421,10 @@ function EffectPresetCard({
 				<button
 					type="button"
 					onClick={() => onSavePreset(effectKey)}
+					title="Save the current values as your custom preset for this effect."
 					className={`cursor-pointer rounded-xl border px-3 py-2 text-xs font-semibold uppercase tracking-[0.12em] transition ${
 						isLight
-							? 'border-cyan-300 bg-cyan-100 text-cyan-700 hover:bg-cyan-200'
+							? 'border-cyan-300 bg-cyan-100/85 text-cyan-800 hover:bg-cyan-200/85'
 							: 'border-cyan-300/30 bg-cyan-500/15 text-cyan-100 hover:bg-cyan-500/25'
 					}`}
 				>
@@ -206,7 +433,7 @@ function EffectPresetCard({
 			</div>
 			<p
 				className={`mt-3 text-xs ${
-					isLight ? 'text-slate-600' : 'text-slate-300/75'
+					isLight ? 'text-amber-800/85' : 'text-slate-300/75'
 				}`}
 			>
 				{selectedKey === CUSTOM_PRESET_KEY
@@ -264,6 +491,15 @@ export function GradientSandbox() {
 
 		return 'dark';
 	});
+	const [guideOpen, setGuideOpen] = useState<boolean>(() => {
+		if (typeof window === 'undefined') {
+			return false;
+		}
+
+		return window.localStorage.getItem('gradient-studio.guide-open.v1') === '1';
+	});
+	const [activeGuideTopic, setActiveGuideTopic] =
+		useState<GuideTopicKey>('workflow');
 	const controlsPanelRef = useRef<HTMLElement | null>(null);
 	const controlsScrollTopRef = useRef(0);
 
@@ -274,6 +510,17 @@ export function GradientSandbox() {
 
 		window.localStorage.setItem('gradient-studio.menu-tone.v1', menuTone);
 	}, [menuTone]);
+
+	useEffect(() => {
+		if (typeof window === 'undefined') {
+			return;
+		}
+
+		window.localStorage.setItem(
+			'gradient-studio.guide-open.v1',
+			guideOpen ? '1' : '0',
+		);
+	}, [guideOpen]);
 
 	useEffect(() => {
 		if (!controlsOpen || !controlsPanelRef.current) {
@@ -374,7 +621,7 @@ export function GradientSandbox() {
 				<section
 					className={`absolute left-3 top-3 z-20 max-w-[min(34rem,calc(100vw-1.5rem))] rounded-3xl border p-5 shadow-[0_25px_80px_rgba(0,0,0,0.38)] backdrop-blur-xl transition-colors duration-500 sm:left-5 sm:top-5 sm:p-6 ${
 						isLightMenu
-							? 'border-slate-300/70 bg-slate-100/88'
+							? 'border-amber-200/70 bg-[#fff8ed]/88 text-amber-950'
 							: 'border-white/20 bg-slate-950/60'
 					}`}
 				>
@@ -391,7 +638,7 @@ export function GradientSandbox() {
 							onClick={() => setHeadingVisible(false)}
 							className={`cursor-pointer rounded-full border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] transition ${
 								isLightMenu
-									? 'border-slate-300 bg-white/90 text-slate-700 hover:bg-white'
+									? 'border-amber-300 bg-[#fff4e5] text-amber-900 hover:bg-[#ffecd8]'
 									: 'border-white/25 bg-white/5 text-white/90 hover:bg-white/10'
 							}`}
 						>
@@ -400,14 +647,14 @@ export function GradientSandbox() {
 					</div>
 					<h1
 						className={`text-3xl font-semibold tracking-tight sm:text-4xl ${
-							isLightMenu ? 'text-slate-900' : 'text-white'
+							isLightMenu ? 'text-amber-950' : 'text-white'
 						}`}
 					>
 						Interactive Gradient Playground
 					</h1>
 					<p
 						className={`mt-3 text-sm leading-relaxed sm:text-base ${
-							isLightMenu ? 'text-slate-700' : 'text-slate-200/85'
+							isLightMenu ? 'text-amber-900/85' : 'text-slate-200/85'
 						}`}
 					>
 						Craft animated gradient scenes with stacked effects, profile groups,
@@ -443,7 +690,7 @@ export function GradientSandbox() {
 					onClick={() => setHeadingVisible(true)}
 					className={`absolute left-3 top-3 z-20 cursor-pointer rounded-full border px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.14em] shadow-[0_10px_28px_rgba(0,0,0,0.35)] transition-colors duration-500 sm:left-5 sm:top-5 ${
 						isLightMenu
-							? 'border-slate-300 bg-white/90 text-slate-700 hover:bg-white'
+							? 'border-amber-300 bg-[#fff4e5] text-amber-900 hover:bg-[#ffecd8]'
 							: 'border-white/25 bg-slate-950/70 text-white hover:bg-slate-900/90'
 					}`}
 				>
@@ -459,11 +706,21 @@ export function GradientSandbox() {
 						aria-label="Close control panel"
 						className="absolute inset-0 z-20 cursor-pointer bg-transparent"
 					/>
+					{guideOpen ? (
+						<aside className="absolute right-112 top-4 z-30 hidden h-[calc(100vh-2rem)] w-80 overflow-y-auto xl:block">
+							<ConceptGuidePanel
+								tone={menuTone}
+								activeTopic={activeGuideTopic}
+								onSelectTopic={setActiveGuideTopic}
+								onClose={() => setGuideOpen(false)}
+							/>
+						</aside>
+					) : null}
 					<aside
 						ref={controlsPanelRef}
 						className={`absolute right-3 top-3 z-30 h-[calc(100vh-1.5rem)] w-[min(26.5rem,calc(100vw-1.5rem))] overflow-y-auto rounded-3xl border p-4 shadow-[0_25px_70px_rgba(0,0,0,0.48)] backdrop-blur-2xl transition-colors duration-500 sm:right-4 sm:top-4 sm:p-5 ${
 							isLightMenu
-								? 'border-slate-300/70 bg-slate-100/90 text-slate-900'
+								? 'border-amber-200/70 bg-[#fff9f0]/92 text-amber-950'
 								: 'border-white/20 bg-slate-950/85 text-slate-100'
 						}`}
 						onScroll={(event) => {
@@ -482,7 +739,7 @@ export function GradientSandbox() {
 								</p>
 								<p
 									className={`mt-1 text-xs ${
-										isLightMenu ? 'text-slate-600' : 'text-slate-300/80'
+										isLightMenu ? 'text-amber-800/85' : 'text-slate-300/80'
 									}`}
 								>
 									Seed: {effectiveSeed}
@@ -496,9 +753,10 @@ export function GradientSandbox() {
 											current === 'dark' ? 'light' : 'dark',
 										)
 									}
+									title="Switch control menu between dark and light tones."
 									className={`cursor-pointer rounded-full border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] transition ${
 										isLightMenu
-											? 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'
+											? 'border-amber-300 bg-[#fff4e5] text-amber-900 hover:bg-[#ffecd8]'
 											: 'border-white/25 bg-white/5 text-white/90 hover:bg-white/10'
 									}`}
 								>
@@ -506,10 +764,23 @@ export function GradientSandbox() {
 								</button>
 								<button
 									type="button"
+									onClick={() => setGuideOpen((current) => !current)}
+									title="Toggle detailed concept help panel."
+									className={`cursor-pointer rounded-full border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] transition ${
+										isLightMenu
+											? 'border-amber-300 bg-[#fff4e5] text-amber-900 hover:bg-[#ffecd8]'
+											: 'border-white/25 bg-white/5 text-white/90 hover:bg-white/10'
+									}`}
+								>
+									Guide: {guideOpen ? 'On' : 'Off'}
+								</button>
+								<button
+									type="button"
 									onClick={() => setControlsOpen(false)}
+									title="Hide studio controls"
 									className={`cursor-pointer rounded-full border px-3 py-1 text-xs uppercase tracking-[0.14em] transition ${
 										isLightMenu
-											? 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'
+											? 'border-amber-300 bg-[#fff4e5] text-amber-900 hover:bg-[#ffecd8]'
 											: 'border-white/25 bg-white/5 text-white/90 hover:bg-white/10'
 									}`}
 								>
@@ -522,7 +793,7 @@ export function GradientSandbox() {
 							<div
 								className={`mb-4 rounded-xl border px-3 py-2 text-xs ${
 									isLightMenu
-										? 'border-cyan-300 bg-cyan-100 text-cyan-800'
+										? 'border-cyan-300 bg-cyan-100/80 text-cyan-900'
 										: 'border-cyan-300/25 bg-cyan-500/10 text-cyan-100/95'
 								}`}
 							>
@@ -530,14 +801,29 @@ export function GradientSandbox() {
 							</div>
 						) : null}
 
+						{guideOpen ? (
+							<div className="mb-4 xl:hidden">
+								<ConceptGuidePanel
+									tone={menuTone}
+									activeTopic={activeGuideTopic}
+									onSelectTopic={setActiveGuideTopic}
+									onClose={() => setGuideOpen(false)}
+									compact
+								/>
+							</div>
+						) : null}
+
 						<div className="space-y-4 pb-2">
 							<PanelSection
 								title="Style"
 								subtitle="Pick the visual feel and motion behavior; color is controlled separately"
+								tone={menuTone}
+								titleHint="High-level look and movement direction. Keep this broad, then fine-tune below."
 							>
 								<GlobalProfileControl
 									title="Style Preset"
 									subtitle="Affects look, animation, and effects without changing palette colors"
+									quickHint="Fast visual mood selector without touching your gradient colors."
 									group="style"
 									presetCatalog={presetCatalog}
 									presetSelections={presetSelections}
@@ -547,9 +833,10 @@ export function GradientSandbox() {
 								<button
 									type="button"
 									onClick={() => saveCustomPreset('style')}
+									title="Save the current style values as your custom style preset."
 									className={`w-full cursor-pointer rounded-xl border px-3 py-2 text-xs font-semibold uppercase tracking-[0.12em] transition ${
 										isLightMenu
-											? 'border-cyan-300 bg-cyan-100 text-cyan-700 hover:bg-cyan-200'
+											? 'border-cyan-300 bg-cyan-100/85 text-cyan-800 hover:bg-cyan-200/85'
 											: 'border-cyan-300/30 bg-cyan-500/15 text-cyan-100 hover:bg-cyan-500/25'
 									}`}
 								>
@@ -560,11 +847,14 @@ export function GradientSandbox() {
 							<PanelSection
 								title="Gradient and Seed"
 								subtitle="Choose a gradient preset, or Off to keep your current colors"
+								tone={menuTone}
+								titleHint="Use tooltips for quick actions. Open Concept Guide for ratio locks and seed strategy details."
 							>
 								<div className="grid gap-3 sm:grid-cols-2">
 									<GlobalProfileControl
 										title="Gradient Preset"
 										subtitle="Off, curated gradient presets, or custom"
+										quickHint="Pick a color direction instantly, then refine swatches below."
 										group="palette"
 										presetCatalog={presetCatalog}
 										presetSelections={presetSelections}
@@ -574,6 +864,7 @@ export function GradientSandbox() {
 									<GlobalProfileControl
 										title="Seed Preset"
 										subtitle="Deterministic seed strategy and lock behavior"
+										quickHint="Controls repeatability so the same seed recreates the same scene."
 										group="seed"
 										presetCatalog={presetCatalog}
 										presetSelections={presetSelections}
@@ -595,13 +886,25 @@ export function GradientSandbox() {
 									tone={menuTone}
 								/>
 
-								<div className="rounded-xl border border-white/12 bg-slate-950/40 p-4">
+								<div
+									className={`rounded-xl border p-4 transition-colors duration-500 ${
+										isLightMenu
+											? 'border-amber-200 bg-[#fff6e8]'
+											: 'border-white/12 bg-slate-950/40'
+									}`}
+								>
 									<ToggleInput
 										label="Lock Deterministic Seed"
+										hint="Keep this on to preserve shape layout and motion pattern for the same seed token."
 										checked={settings.seedLocked}
+										tone={menuTone}
 										onChange={(value) => updateSetting('seedLocked', value)}
 									/>
-									<label className="mt-4 block text-[11px] uppercase tracking-[0.16em] text-slate-300/80">
+									<label
+										className={`mt-4 block text-[11px] uppercase tracking-[0.16em] ${
+											isLightMenu ? 'text-amber-800/85' : 'text-slate-300/80'
+										}`}
+									>
 										<span>Seed Token</span>
 										<input
 											type="text"
@@ -609,30 +912,46 @@ export function GradientSandbox() {
 											onChange={(event) =>
 												updateSetting('seed', event.target.value)
 											}
-											className="mt-1.5 w-full rounded-xl border border-white/20 bg-slate-950/80 px-3 py-2 text-sm normal-case tracking-normal text-white outline-none transition focus:border-cyan-300/70"
+											title="Any text token works. Same token plus locked seed yields repeatable output."
+											className={`mt-1.5 w-full rounded-xl border px-3 py-2 text-sm normal-case tracking-normal outline-none transition ${
+												isLightMenu
+													? 'border-amber-200 bg-[#fffef8] text-amber-950 focus:border-cyan-500'
+													: 'border-white/20 bg-slate-950/80 text-white focus:border-cyan-300/70'
+											}`}
 										/>
 									</label>
 									<div className="mt-4 grid gap-2 sm:grid-cols-3">
 										<button
 											type="button"
 											onClick={randomizeSeed}
-											className="w-full cursor-pointer rounded-xl border border-cyan-300/30 bg-cyan-500/15 px-3 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-cyan-100 transition hover:bg-cyan-500/25"
+											title="Generate a new seed while keeping all current controls."
+											className={`w-full cursor-pointer rounded-xl border px-3 py-2 text-xs font-semibold uppercase tracking-[0.14em] transition ${
+												isLightMenu
+													? 'border-cyan-300 bg-cyan-100/85 text-cyan-800 hover:bg-cyan-200/85'
+													: 'border-cyan-300/30 bg-cyan-500/15 text-cyan-100 hover:bg-cyan-500/25'
+											}`}
 										>
 											Reroll Seed
 										</button>
 										<button
 											type="button"
 											onClick={resetToDefaults}
-											className="w-full cursor-pointer rounded-xl border border-white/25 bg-white/5 px-3 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-white/90 transition hover:bg-white/10"
+											title="Reset all controls to default values."
+											className={`w-full cursor-pointer rounded-xl border px-3 py-2 text-xs font-semibold uppercase tracking-[0.14em] transition ${
+												isLightMenu
+													? 'border-amber-200 bg-[#fff0dc] text-amber-900 hover:bg-[#ffe8cf]'
+													: 'border-white/25 bg-white/5 text-white/90 hover:bg-white/10'
+											}`}
 										>
 											Reset Defaults
 										</button>
 										<button
 											type="button"
 											onClick={() => saveCustomPreset('seed')}
+											title="Save current seed behavior as your custom seed preset."
 											className={`w-full cursor-pointer rounded-xl border px-3 py-2 text-xs font-semibold uppercase tracking-[0.14em] transition ${
 												isLightMenu
-													? 'border-cyan-300 bg-cyan-100 text-cyan-700 hover:bg-cyan-200'
+													? 'border-cyan-300 bg-cyan-100/85 text-cyan-800 hover:bg-cyan-200/85'
 													: 'border-cyan-300/30 bg-cyan-500/15 text-cyan-100 hover:bg-cyan-500/25'
 											}`}
 										>
@@ -645,11 +964,14 @@ export function GradientSandbox() {
 							<PanelSection
 								title="Layout and Motion"
 								subtitle="Composition density, shape family, and movement"
+								tone={menuTone}
+								titleHint="Layout affects composition shape. Motion controls tempo and drift energy."
 							>
 								<div className="grid gap-3 sm:grid-cols-2">
 									<GlobalProfileControl
 										title="Layout Preset"
 										subtitle="Density and radius distribution"
+										quickHint="Fast composition tuning for circle count and radius balance."
 										group="layout"
 										presetCatalog={presetCatalog}
 										presetSelections={presetSelections}
@@ -659,6 +981,7 @@ export function GradientSandbox() {
 									<GlobalProfileControl
 										title="Motion Preset"
 										subtitle="Animation energy and drift cadence"
+										quickHint="Switch between Off and animated movement profiles quickly."
 										group="motion"
 										presetCatalog={presetCatalog}
 										presetSelections={presetSelections}
@@ -671,9 +994,10 @@ export function GradientSandbox() {
 									<button
 										type="button"
 										onClick={() => saveCustomPreset('layout')}
+										title="Save the current layout values as your custom layout preset."
 										className={`w-full cursor-pointer rounded-xl border px-3 py-2 text-xs font-semibold uppercase tracking-[0.12em] transition ${
 											isLightMenu
-												? 'border-cyan-300 bg-cyan-100 text-cyan-700 hover:bg-cyan-200'
+												? 'border-cyan-300 bg-cyan-100/85 text-cyan-800 hover:bg-cyan-200/85'
 												: 'border-cyan-300/30 bg-cyan-500/15 text-cyan-100 hover:bg-cyan-500/25'
 										}`}
 									>
@@ -682,9 +1006,10 @@ export function GradientSandbox() {
 									<button
 										type="button"
 										onClick={() => saveCustomPreset('motion')}
+										title="Save the current motion values as your custom motion preset."
 										className={`w-full cursor-pointer rounded-xl border px-3 py-2 text-xs font-semibold uppercase tracking-[0.12em] transition ${
 											isLightMenu
-												? 'border-cyan-300 bg-cyan-100 text-cyan-700 hover:bg-cyan-200'
+												? 'border-cyan-300 bg-cyan-100/85 text-cyan-800 hover:bg-cyan-200/85'
 												: 'border-cyan-300/30 bg-cyan-500/15 text-cyan-100 hover:bg-cyan-500/25'
 										}`}
 									>
@@ -694,6 +1019,7 @@ export function GradientSandbox() {
 
 								<RangeInput
 									label="Circle Count"
+									hint="Lower values produce bolder, cleaner compositions."
 									value={settings.circleCount}
 									min={1}
 									max={30}
@@ -717,23 +1043,50 @@ export function GradientSandbox() {
 								/>
 								<ToggleInput
 									label="Allow Edge Crop"
+									hint="Allow circles to extend beyond viewport edges for a cinematic crop."
 									checked={settings.allowCrop}
 									onChange={(value) => updateSetting('allowCrop', value)}
 								/>
 
-								<div className="rounded-xl border border-white/12 bg-slate-950/40 p-3">
-									<p className="mb-2 text-[10px] uppercase tracking-[0.14em] text-slate-300/75">
+								<div
+									className={`rounded-xl border p-3 transition-colors duration-500 ${
+										isLightMenu
+											? 'border-amber-200 bg-[#fff6e8]'
+											: 'border-white/12 bg-slate-950/40'
+									}`}
+								>
+									<p
+										className={`mb-2 text-[10px] uppercase tracking-[0.14em] ${
+											isLightMenu ? 'text-amber-800/85' : 'text-slate-300/75'
+										}`}
+									>
 										Shape Families
 									</p>
 									<div className="grid grid-cols-2 gap-2 text-xs">
 										{shapeOptions.map((shape) => (
 											<label
 												key={shape.value}
-												className="flex cursor-pointer items-center justify-between rounded-lg border border-white/12 bg-slate-900/60 px-2.5 py-1.5"
+												className={`flex cursor-pointer items-center justify-between rounded-lg border px-2.5 py-1.5 transition-colors duration-500 ${
+													isLightMenu
+														? 'border-amber-200 bg-[#fffdf7]'
+														: 'border-white/12 bg-slate-900/60'
+												}`}
 											>
 												<div>
-													<p className="text-white/90">{shape.label}</p>
-													<p className="text-[10px] text-slate-400">
+													<p
+														className={
+															isLightMenu ? 'text-amber-950' : 'text-white/90'
+														}
+													>
+														{shape.label}
+													</p>
+													<p
+														className={`text-[10px] ${
+															isLightMenu
+																? 'text-amber-800/80'
+																: 'text-slate-400'
+														}`}
+													>
 														{shape.help}
 													</p>
 												</div>
@@ -755,6 +1108,7 @@ export function GradientSandbox() {
 
 								<ToggleInput
 									label="Animate"
+									hint="Turn motion Off for still frames and deterministic snapshots."
 									checked={settings.animate}
 									onChange={(value) => updateSetting('animate', value)}
 								/>
@@ -815,15 +1169,19 @@ export function GradientSandbox() {
 							<PanelSection
 								title="Core FX"
 								subtitle="Blur, glow, and grain shaping"
+								tone={menuTone}
+								titleHint="Use these first. They establish softness, light bloom, and texture foundation."
 							>
 								<EffectPresetCard
 									title="Blur"
 									subtitle="Softness and diffusion"
+									quickHint="Higher blur smooths gradients but can hide shape detail."
 									effectKey="blur"
 									presetCatalog={effectPresetCatalog}
 									presetSelections={effectPresetSelections}
 									onApplyPreset={applyEffectPreset}
 									onSavePreset={saveCustomEffectPreset}
+									tone={menuTone}
 								>
 									<RangeInput
 										label="Blur Amount"
@@ -840,11 +1198,13 @@ export function GradientSandbox() {
 								<EffectPresetCard
 									title="Glow"
 									subtitle="Halo and blend shaping"
+									quickHint="Blend mode shifts how glow mixes with the base scene."
 									effectKey="glow"
 									presetCatalog={effectPresetCatalog}
 									presetSelections={effectPresetSelections}
 									onApplyPreset={applyEffectPreset}
 									onSavePreset={saveCustomEffectPreset}
+									tone={menuTone}
 								>
 									<RangeInput
 										label="Glow Blur"
@@ -869,6 +1229,8 @@ export function GradientSandbox() {
 									<SelectInput<GlowBlendMode>
 										label="Glow Blend Mode"
 										value={settings.glowBlendMode}
+										tone={menuTone}
+										hint="Try Screen for natural bloom and Color Dodge for punchier highlights."
 										onChange={(value) => updateSetting('glowBlendMode', value)}
 										hideLabel
 										options={GLOW_BLEND_OPTIONS}
@@ -878,11 +1240,13 @@ export function GradientSandbox() {
 								<EffectPresetCard
 									title="Noise"
 									subtitle="Fine and coarse grain"
+									quickHint="Use subtle noise to avoid flat digital gradients."
 									effectKey="noise"
 									presetCatalog={effectPresetCatalog}
 									presetSelections={effectPresetSelections}
 									onApplyPreset={applyEffectPreset}
 									onSavePreset={saveCustomEffectPreset}
+									tone={menuTone}
 								>
 									<RangeInput
 										label="Fine Noise Opacity"
@@ -935,15 +1299,19 @@ export function GradientSandbox() {
 								title="Advanced FX"
 								subtitle="Distortion, fusion, bloom, posterize, and caustics"
 								defaultOpen={false}
+								tone={menuTone}
+								titleHint="Powerful stylizers. Add one at a time, then rebalance intensity."
 							>
 								<EffectPresetCard
 									title="Liquid Warp"
 									subtitle="Distortion intensity and tempo"
+									quickHint="Distorts geometry; too much can blur focal structure."
 									effectKey="warp"
 									presetCatalog={effectPresetCatalog}
 									presetSelections={effectPresetSelections}
 									onApplyPreset={applyEffectPreset}
 									onSavePreset={saveCustomEffectPreset}
+									tone={menuTone}
 								>
 									<RangeInput
 										label="Warp Amount"
@@ -980,11 +1348,13 @@ export function GradientSandbox() {
 								<EffectPresetCard
 									title="Metaball Melt"
 									subtitle="Shape fusion and threshold"
+									quickHint="Merges nearby shapes into organic blobs."
 									effectKey="metaball"
 									presetCatalog={effectPresetCatalog}
 									presetSelections={effectPresetSelections}
 									onApplyPreset={applyEffectPreset}
 									onSavePreset={saveCustomEffectPreset}
+									tone={menuTone}
 								>
 									<RangeInput
 										label="Melt Blur"
@@ -1011,11 +1381,13 @@ export function GradientSandbox() {
 								<EffectPresetCard
 									title="Bloom"
 									subtitle="Highlight threshold and spread"
+									quickHint="Lower threshold catches more highlights and can wash the scene."
 									effectKey="bloom"
 									presetCatalog={effectPresetCatalog}
 									presetSelections={effectPresetSelections}
 									onApplyPreset={applyEffectPreset}
 									onSavePreset={saveCustomEffectPreset}
+									tone={menuTone}
 								>
 									<RangeInput
 										label="Bloom Threshold"
@@ -1050,11 +1422,13 @@ export function GradientSandbox() {
 								<EffectPresetCard
 									title="Posterize"
 									subtitle="Band count and graphic strength"
+									quickHint="Lower levels create a bold graphic look."
 									effectKey="posterize"
 									presetCatalog={effectPresetCatalog}
 									presetSelections={effectPresetSelections}
 									onApplyPreset={applyEffectPreset}
 									onSavePreset={saveCustomEffectPreset}
+									tone={menuTone}
 								>
 									<RangeInput
 										label="Posterize Levels"
@@ -1083,11 +1457,13 @@ export function GradientSandbox() {
 								<EffectPresetCard
 									title="Caustic Light"
 									subtitle="Refractive texture intensity"
+									quickHint="Adds watery light refraction detail across the scene."
 									effectKey="caustic"
 									presetCatalog={effectPresetCatalog}
 									presetSelections={effectPresetSelections}
 									onApplyPreset={applyEffectPreset}
 									onSavePreset={saveCustomEffectPreset}
+									tone={menuTone}
 								>
 									<RangeInput
 										label="Caustic Intensity"
@@ -1128,15 +1504,19 @@ export function GradientSandbox() {
 								title="Depth and Styling"
 								subtitle="Parallax, sweep, fringe, vignette, and drift"
 								defaultOpen={false}
+								tone={menuTone}
+								titleHint="Scene-level stylizers. Use subtle values for polish, higher values for experimental looks."
 							>
 								<EffectPresetCard
 									title="Depth Parallax"
 									subtitle="Layer stacking and depth strength"
+									quickHint="Creates perceived depth by layering movement and blur cues."
 									effectKey="depth"
 									presetCatalog={effectPresetCatalog}
 									presetSelections={effectPresetSelections}
 									onApplyPreset={applyEffectPreset}
 									onSavePreset={saveCustomEffectPreset}
+									tone={menuTone}
 								>
 									<RangeInput
 										label="Depth Layers"
@@ -1161,11 +1541,13 @@ export function GradientSandbox() {
 								<EffectPresetCard
 									title="Chromatic Fringe"
 									subtitle="RGB channel split applied across the scene"
+									quickHint="Small values feel optical. Large values push stylized glitch energy."
 									effectKey="fringe"
 									presetCatalog={effectPresetCatalog}
 									presetSelections={effectPresetSelections}
 									onApplyPreset={applyEffectPreset}
 									onSavePreset={saveCustomEffectPreset}
+									tone={menuTone}
 								>
 									<RangeInput
 										label="Fringe Amount"
@@ -1182,11 +1564,13 @@ export function GradientSandbox() {
 								<EffectPresetCard
 									title="Light Sweep"
 									subtitle="Directional beam intensity and speed"
+									quickHint="Adds directional cinematic lighting movement."
 									effectKey="sweep"
 									presetCatalog={effectPresetCatalog}
 									presetSelections={effectPresetSelections}
 									onApplyPreset={applyEffectPreset}
 									onSavePreset={saveCustomEffectPreset}
+									tone={menuTone}
 								>
 									<RangeInput
 										label="Sweep Intensity"
@@ -1233,11 +1617,13 @@ export function GradientSandbox() {
 								<EffectPresetCard
 									title="Hue Rotate"
 									subtitle="Global hue cycle and color spin"
+									quickHint="Useful for slow ambient color cycling across the whole scene."
 									effectKey="hueRotate"
 									presetCatalog={effectPresetCatalog}
 									presetSelections={effectPresetSelections}
 									onApplyPreset={applyEffectPreset}
 									onSavePreset={saveCustomEffectPreset}
+									tone={menuTone}
 								>
 									<RangeInput
 										label="Hue Degrees"
@@ -1266,11 +1652,13 @@ export function GradientSandbox() {
 								<EffectPresetCard
 									title="Vignette"
 									subtitle="Edge darkening and tone"
+									quickHint="Use gently for focus; strong values create dramatic framing."
 									effectKey="vignette"
 									presetCatalog={effectPresetCatalog}
 									presetSelections={effectPresetSelections}
 									onApplyPreset={applyEffectPreset}
 									onSavePreset={saveCustomEffectPreset}
+									tone={menuTone}
 								>
 									<RangeInput
 										label="Vignette Amount"
@@ -1282,7 +1670,11 @@ export function GradientSandbox() {
 										formatValue={(value) => value.toFixed(2)}
 										onChange={(value) => updateSetting('vignetteAmount', value)}
 									/>
-									<label className="block text-[11px] uppercase tracking-[0.16em] text-slate-300/80">
+									<label
+										className={`block text-[11px] uppercase tracking-[0.16em] ${
+											isLightMenu ? 'text-amber-800/85' : 'text-slate-300/80'
+										}`}
+									>
 										<span>Vignette Color</span>
 										<input
 											type="color"
@@ -1291,7 +1683,12 @@ export function GradientSandbox() {
 											onChange={(event) =>
 												updateSetting('vignetteColor', event.target.value)
 											}
-											className="mt-1.5 h-10 w-full cursor-pointer rounded-xl border border-white/20 bg-slate-950/80 p-1 disabled:cursor-not-allowed disabled:opacity-45"
+											title="Choose the edge tint used by the vignette effect."
+											className={`mt-1.5 h-10 w-full cursor-pointer rounded-xl border p-1 disabled:cursor-not-allowed disabled:opacity-45 ${
+												isLightMenu
+													? 'border-amber-200 bg-[#fffdf7]'
+													: 'border-white/20 bg-slate-950/80'
+											}`}
 										/>
 									</label>
 								</EffectPresetCard>
@@ -1299,11 +1696,13 @@ export function GradientSandbox() {
 								<EffectPresetCard
 									title="Palette Drift"
 									subtitle="Animated hue drift amount"
+									quickHint="Slow drift keeps scenes alive without obvious hue cycling."
 									effectKey="paletteDrift"
 									presetCatalog={effectPresetCatalog}
 									presetSelections={effectPresetSelections}
 									onApplyPreset={applyEffectPreset}
 									onSavePreset={saveCustomEffectPreset}
+									tone={menuTone}
 								>
 									<RangeInput
 										label="Palette Drift Speed"
@@ -1328,7 +1727,7 @@ export function GradientSandbox() {
 					onClick={() => setControlsOpen(true)}
 					className={`absolute right-4 top-4 z-30 cursor-pointer rounded-full border px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] shadow-[0_10px_30px_rgba(0,0,0,0.35)] transition-colors duration-500 ${
 						isLightMenu
-							? 'border-slate-300 bg-white/90 text-slate-700 hover:bg-white'
+							? 'border-amber-300 bg-[#fff4e5] text-amber-900 hover:bg-[#ffecd8]'
 							: 'border-white/25 bg-slate-950/75 text-white hover:bg-slate-900/90'
 					}`}
 				>
