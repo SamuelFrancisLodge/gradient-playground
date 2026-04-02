@@ -29,6 +29,8 @@ const GLOW_BLEND_OPTIONS: Array<{ label: string; value: GlowBlendMode }> = [
 	{ label: 'Soft Light', value: 'soft-light' },
 ];
 
+type MenuTone = 'dark' | 'light';
+
 type EffectPresetCardProps = {
 	title: string;
 	subtitle: string;
@@ -37,6 +39,7 @@ type EffectPresetCardProps = {
 	presetSelections: EffectPresetSelectionState;
 	onApplyPreset: (effect: EffectPresetKey, key: string) => void;
 	onSavePreset: (effect: EffectPresetKey) => void;
+	tone?: MenuTone;
 	children: ReactNode;
 };
 
@@ -47,7 +50,9 @@ type GlobalProfileControlProps = {
 	presetCatalog: PresetCatalog;
 	presetSelections: PresetSelectionState;
 	onApplyProfile: (group: PresetGroupKey, key: string) => void;
-	onSaveProfile: (group: PresetGroupKey) => void;
+	onSaveProfile?: (group: PresetGroupKey) => void;
+	showSaveButton?: boolean;
+	tone?: MenuTone;
 };
 
 function GlobalProfileControl({
@@ -58,19 +63,42 @@ function GlobalProfileControl({
 	presetSelections,
 	onApplyProfile,
 	onSaveProfile,
+	showSaveButton = false,
+	tone = 'dark',
 }: GlobalProfileControlProps) {
+	const isLight = tone === 'light';
 	const selectedKey = presetSelections[group];
 	const selected = presetCatalog[group].find(
 		(entry) => entry.key === selectedKey,
 	);
 
 	return (
-		<div className="rounded-xl border border-white/12 bg-slate-950/40 p-3">
-			<p className="text-[10px] uppercase tracking-[0.15em] text-cyan-100/85">
+		<div
+			className={`rounded-xl border p-4 transition-colors duration-500 ${
+				isLight
+					? 'border-slate-300 bg-white/85'
+					: 'border-white/12 bg-slate-950/40'
+			}`}
+		>
+			<p
+				className={`text-[10px] uppercase tracking-[0.15em] ${
+					isLight ? 'text-cyan-700' : 'text-cyan-100/85'
+				}`}
+			>
 				{title}
 			</p>
-			<p className="mt-1 text-xs text-slate-300/75">{subtitle}</p>
-			<div className="mt-2 grid grid-cols-[minmax(0,1fr)_auto] gap-2">
+			<p
+				className={`mt-1.5 text-xs ${
+					isLight ? 'text-slate-600' : 'text-slate-300/75'
+				}`}
+			>
+				{subtitle}
+			</p>
+			<div
+				className={`mt-3 ${
+					showSaveButton ? 'grid grid-cols-[minmax(0,1fr)_auto] gap-2' : ''
+				}`}
+			>
 				<SelectInput
 					hideLabel
 					value={selectedKey}
@@ -83,17 +111,27 @@ function GlobalProfileControl({
 						{ label: 'Custom', value: CUSTOM_PRESET_KEY },
 					]}
 				/>
-				<button
-					type="button"
-					onClick={() => onSaveProfile(group)}
-					className="cursor-pointer rounded-xl border border-cyan-300/30 bg-cyan-500/15 px-3 py-2 text-xs font-semibold uppercase tracking-[0.12em] text-cyan-100 transition hover:bg-cyan-500/25"
-				>
-					Save Custom
-				</button>
+				{showSaveButton && onSaveProfile ? (
+					<button
+						type="button"
+						onClick={() => onSaveProfile(group)}
+						className={`cursor-pointer rounded-xl border px-3 py-2 text-xs font-semibold uppercase tracking-[0.12em] transition ${
+							isLight
+								? 'border-cyan-300 bg-cyan-100 text-cyan-700 hover:bg-cyan-200'
+								: 'border-cyan-300/30 bg-cyan-500/15 text-cyan-100 hover:bg-cyan-500/25'
+						}`}
+					>
+						Save Custom
+					</button>
+				) : null}
 			</div>
-			<p className="mt-2 text-xs text-slate-300/75">
+			<p
+				className={`mt-3 text-xs ${
+					isLight ? 'text-slate-600' : 'text-slate-300/75'
+				}`}
+			>
 				{selectedKey === CUSTOM_PRESET_KEY
-					? 'Manual profile values.'
+					? 'Manual preset values.'
 					: (selected?.description ?? 'Choose an option.')}
 			</p>
 		</div>
@@ -108,20 +146,38 @@ function EffectPresetCard({
 	presetSelections,
 	onApplyPreset,
 	onSavePreset,
+	tone = 'dark',
 	children,
 }: EffectPresetCardProps) {
+	const isLight = tone === 'light';
 	const selectedKey = presetSelections[effectKey];
 	const selected = presetCatalog[effectKey].find(
 		(preset) => preset.key === selectedKey,
 	);
 
 	return (
-		<div className="rounded-xl border border-white/12 bg-slate-950/40 p-3">
-			<div className="mb-3">
-				<p className="text-[10px] uppercase tracking-[0.15em] text-cyan-100/85">
+		<div
+			className={`rounded-xl border p-4 transition-colors duration-500 ${
+				isLight
+					? 'border-slate-300 bg-white/85'
+					: 'border-white/12 bg-slate-950/40'
+			}`}
+		>
+			<div className="mb-4">
+				<p
+					className={`text-[10px] uppercase tracking-[0.15em] ${
+						isLight ? 'text-cyan-700' : 'text-cyan-100/85'
+					}`}
+				>
 					{title}
 				</p>
-				<p className="mt-1 text-xs text-slate-300/75">{subtitle}</p>
+				<p
+					className={`mt-1.5 text-xs ${
+						isLight ? 'text-slate-600' : 'text-slate-300/75'
+					}`}
+				>
+					{subtitle}
+				</p>
 			</div>
 			<div className="grid grid-cols-[minmax(0,1fr)_auto] gap-2">
 				<SelectInput
@@ -139,17 +195,25 @@ function EffectPresetCard({
 				<button
 					type="button"
 					onClick={() => onSavePreset(effectKey)}
-					className="cursor-pointer rounded-xl border border-cyan-300/30 bg-cyan-500/15 px-3 py-2 text-xs font-semibold uppercase tracking-[0.12em] text-cyan-100 transition hover:bg-cyan-500/25"
+					className={`cursor-pointer rounded-xl border px-3 py-2 text-xs font-semibold uppercase tracking-[0.12em] transition ${
+						isLight
+							? 'border-cyan-300 bg-cyan-100 text-cyan-700 hover:bg-cyan-200'
+							: 'border-cyan-300/30 bg-cyan-500/15 text-cyan-100 hover:bg-cyan-500/25'
+					}`}
 				>
 					Save Custom
 				</button>
 			</div>
-			<p className="mt-2 text-xs text-slate-300/75">
+			<p
+				className={`mt-3 text-xs ${
+					isLight ? 'text-slate-600' : 'text-slate-300/75'
+				}`}
+			>
 				{selectedKey === CUSTOM_PRESET_KEY
-					? 'Manual profile values.'
-					: (selected?.description ?? 'Choose a profile.')}
+					? 'Manual preset values.'
+					: (selected?.description ?? 'Choose a preset.')}
 			</p>
-			<div className="mt-3 space-y-3">{children}</div>
+			<div className="mt-4 space-y-4">{children}</div>
 		</div>
 	);
 }
@@ -174,6 +238,7 @@ export function GradientSandbox() {
 		addPaletteColor,
 		removePaletteColor,
 		togglePaletteColor,
+		togglePaletteLock,
 		setPaletteHex,
 		setPaletteWeight,
 		rebalancePalette,
@@ -187,8 +252,28 @@ export function GradientSandbox() {
 	} = useGradientStudioState();
 
 	const [headingVisible, setHeadingVisible] = useState(true);
+	const [menuTone, setMenuTone] = useState<MenuTone>(() => {
+		if (typeof window === 'undefined') {
+			return 'dark';
+		}
+
+		const stored = window.localStorage.getItem('gradient-studio.menu-tone.v1');
+		if (stored === 'light' || stored === 'dark') {
+			return stored;
+		}
+
+		return 'dark';
+	});
 	const controlsPanelRef = useRef<HTMLElement | null>(null);
 	const controlsScrollTopRef = useRef(0);
+
+	useEffect(() => {
+		if (typeof window === 'undefined') {
+			return;
+		}
+
+		window.localStorage.setItem('gradient-studio.menu-tone.v1', menuTone);
+	}, [menuTone]);
 
 	useEffect(() => {
 		if (!controlsOpen || !controlsPanelRef.current) {
@@ -198,8 +283,15 @@ export function GradientSandbox() {
 		controlsPanelRef.current.scrollTop = controlsScrollTopRef.current;
 	}, [controlsOpen]);
 
-	const renderToneClass =
-		renderLoad.label === 'Heavy'
+	const isLightMenu = menuTone === 'light';
+
+	const renderToneClass = isLightMenu
+		? renderLoad.label === 'Heavy'
+			? 'text-rose-700'
+			: renderLoad.label === 'Balanced'
+				? 'text-amber-700'
+				: 'text-emerald-700'
+		: renderLoad.label === 'Heavy'
 			? 'text-rose-100'
 			: renderLoad.label === 'Balanced'
 				? 'text-amber-100'
@@ -279,23 +371,45 @@ export function GradientSandbox() {
 			<div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_18%,rgba(56,189,248,0.22),transparent_36%),radial-gradient(circle_at_85%_74%,rgba(249,115,22,0.16),transparent_40%)]" />
 
 			{headingVisible ? (
-				<section className="absolute left-3 top-3 z-20 max-w-[min(34rem,calc(100vw-1.5rem))] rounded-3xl border border-white/20 bg-slate-950/60 p-5 shadow-[0_25px_80px_rgba(0,0,0,0.38)] backdrop-blur-xl sm:left-5 sm:top-5 sm:p-6">
+				<section
+					className={`absolute left-3 top-3 z-20 max-w-[min(34rem,calc(100vw-1.5rem))] rounded-3xl border p-5 shadow-[0_25px_80px_rgba(0,0,0,0.38)] backdrop-blur-xl transition-colors duration-500 sm:left-5 sm:top-5 sm:p-6 ${
+						isLightMenu
+							? 'border-slate-300/70 bg-slate-100/88'
+							: 'border-white/20 bg-slate-950/60'
+					}`}
+				>
 					<div className="mb-3 flex items-start justify-between gap-3">
-						<p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-cyan-100/90">
+						<p
+							className={`text-[11px] font-semibold uppercase tracking-[0.28em] ${
+								isLightMenu ? 'text-cyan-700' : 'text-cyan-100/90'
+							}`}
+						>
 							Gradient Studio
 						</p>
 						<button
 							type="button"
 							onClick={() => setHeadingVisible(false)}
-							className="cursor-pointer rounded-full border border-white/25 bg-white/5 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-white/90 transition hover:bg-white/10"
+							className={`cursor-pointer rounded-full border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] transition ${
+								isLightMenu
+									? 'border-slate-300 bg-white/90 text-slate-700 hover:bg-white'
+									: 'border-white/25 bg-white/5 text-white/90 hover:bg-white/10'
+							}`}
 						>
 							Hide Heading
 						</button>
 					</div>
-					<h1 className="text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+					<h1
+						className={`text-3xl font-semibold tracking-tight sm:text-4xl ${
+							isLightMenu ? 'text-slate-900' : 'text-white'
+						}`}
+					>
 						Interactive Gradient Playground
 					</h1>
-					<p className="mt-3 text-sm leading-relaxed text-slate-200/85 sm:text-base">
+					<p
+						className={`mt-3 text-sm leading-relaxed sm:text-base ${
+							isLightMenu ? 'text-slate-700' : 'text-slate-200/85'
+						}`}
+					>
 						Craft animated gradient scenes with stacked effects, profile groups,
 						palette thumbnails, and deterministic seeds.
 					</p>
@@ -303,16 +417,23 @@ export function GradientSandbox() {
 						<TinyStat
 							label="Palette"
 							value={`${activePaletteCount}/${settings.palette.length} active`}
+							tone={menuTone}
 						/>
-						<TinyStat label="Effects" value={`${activeEffectsCount} active`} />
+						<TinyStat
+							label="Effects"
+							value={`${activeEffectsCount} active`}
+							tone={menuTone}
+						/>
 						<TinyStat
 							label="Motion"
 							value={settings.animate ? 'Animated' : 'Static'}
+							tone={menuTone}
 						/>
 						<TinyStat
 							label="Render"
 							value={renderLoad.label}
 							colorClass={renderToneClass}
+							tone={menuTone}
 						/>
 					</div>
 				</section>
@@ -320,7 +441,11 @@ export function GradientSandbox() {
 				<button
 					type="button"
 					onClick={() => setHeadingVisible(true)}
-					className="absolute left-3 top-3 z-20 cursor-pointer rounded-full border border-white/25 bg-slate-950/70 px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-white shadow-[0_10px_28px_rgba(0,0,0,0.35)] transition hover:bg-slate-900/90 sm:left-5 sm:top-5"
+					className={`absolute left-3 top-3 z-20 cursor-pointer rounded-full border px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.14em] shadow-[0_10px_28px_rgba(0,0,0,0.35)] transition-colors duration-500 sm:left-5 sm:top-5 ${
+						isLightMenu
+							? 'border-slate-300 bg-white/90 text-slate-700 hover:bg-white'
+							: 'border-white/25 bg-slate-950/70 text-white hover:bg-slate-900/90'
+					}`}
 				>
 					Show Heading
 				</button>
@@ -336,7 +461,11 @@ export function GradientSandbox() {
 					/>
 					<aside
 						ref={controlsPanelRef}
-						className="absolute right-3 top-3 z-30 h-[calc(100vh-1.5rem)] w-[min(26.5rem,calc(100vw-1.5rem))] overflow-y-auto rounded-3xl border border-white/20 bg-slate-950/85 p-4 shadow-[0_25px_70px_rgba(0,0,0,0.48)] backdrop-blur-2xl sm:right-4 sm:top-4 sm:p-5"
+						className={`absolute right-3 top-3 z-30 h-[calc(100vh-1.5rem)] w-[min(26.5rem,calc(100vw-1.5rem))] overflow-y-auto rounded-3xl border p-4 shadow-[0_25px_70px_rgba(0,0,0,0.48)] backdrop-blur-2xl transition-colors duration-500 sm:right-4 sm:top-4 sm:p-5 ${
+							isLightMenu
+								? 'border-slate-300/70 bg-slate-100/90 text-slate-900'
+								: 'border-white/20 bg-slate-950/85 text-slate-100'
+						}`}
 						onScroll={(event) => {
 							controlsScrollTopRef.current = event.currentTarget.scrollTop;
 						}}
@@ -344,66 +473,112 @@ export function GradientSandbox() {
 					>
 						<div className="mb-4 flex items-start justify-between gap-3">
 							<div>
-								<p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-cyan-100/85">
+								<p
+									className={`text-[11px] font-semibold uppercase tracking-[0.24em] ${
+										isLightMenu ? 'text-cyan-700' : 'text-cyan-100/85'
+									}`}
+								>
 									Studio Controls
 								</p>
-								<p className="mt-1 text-xs text-slate-300/80">
+								<p
+									className={`mt-1 text-xs ${
+										isLightMenu ? 'text-slate-600' : 'text-slate-300/80'
+									}`}
+								>
 									Seed: {effectiveSeed}
 								</p>
 							</div>
-							<button
-								type="button"
-								onClick={() => setControlsOpen(false)}
-								className="cursor-pointer rounded-full border border-white/25 bg-white/5 px-3 py-1 text-xs uppercase tracking-[0.14em] text-white/90 transition hover:bg-white/10"
-							>
-								Hide
-							</button>
+							<div className="flex flex-col items-end gap-2">
+								<button
+									type="button"
+									onClick={() =>
+										setMenuTone((current) =>
+											current === 'dark' ? 'light' : 'dark',
+										)
+									}
+									className={`cursor-pointer rounded-full border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] transition ${
+										isLightMenu
+											? 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'
+											: 'border-white/25 bg-white/5 text-white/90 hover:bg-white/10'
+									}`}
+								>
+									Menu: {isLightMenu ? 'Light' : 'Dark'}
+								</button>
+								<button
+									type="button"
+									onClick={() => setControlsOpen(false)}
+									className={`cursor-pointer rounded-full border px-3 py-1 text-xs uppercase tracking-[0.14em] transition ${
+										isLightMenu
+											? 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'
+											: 'border-white/25 bg-white/5 text-white/90 hover:bg-white/10'
+									}`}
+								>
+									Hide
+								</button>
+							</div>
 						</div>
 
 						{statusMessage ? (
-							<div className="mb-4 rounded-xl border border-cyan-300/25 bg-cyan-500/10 px-3 py-2 text-xs text-cyan-100/95">
+							<div
+								className={`mb-4 rounded-xl border px-3 py-2 text-xs ${
+									isLightMenu
+										? 'border-cyan-300 bg-cyan-100 text-cyan-800'
+										: 'border-cyan-300/25 bg-cyan-500/10 text-cyan-100/95'
+								}`}
+							>
 								{statusMessage}
 							</div>
 						) : null}
 
 						<div className="space-y-4 pb-2">
 							<PanelSection
-								title="Style Profile"
-								subtitle="Use-case driven look recipes; keep palette selection separate"
+								title="Style"
+								subtitle="Pick the visual feel and motion behavior; color is controlled separately"
 							>
 								<GlobalProfileControl
-									title="Use Case"
-									subtitle="Poster, bloom, warp, fringe, and other effect-first profiles"
+									title="Style Preset"
+									subtitle="Affects look, animation, and effects without changing palette colors"
 									group="style"
 									presetCatalog={presetCatalog}
 									presetSelections={presetSelections}
 									onApplyProfile={applyPreset}
-									onSaveProfile={saveCustomPreset}
+									tone={menuTone}
 								/>
+								<button
+									type="button"
+									onClick={() => saveCustomPreset('style')}
+									className={`w-full cursor-pointer rounded-xl border px-3 py-2 text-xs font-semibold uppercase tracking-[0.12em] transition ${
+										isLightMenu
+											? 'border-cyan-300 bg-cyan-100 text-cyan-700 hover:bg-cyan-200'
+											: 'border-cyan-300/30 bg-cyan-500/15 text-cyan-100 hover:bg-cyan-500/25'
+									}`}
+								>
+									Save Style Custom
+								</button>
 							</PanelSection>
 
 							<PanelSection
-								title="Color and Seed"
-								subtitle="Palette direction, color balance, and deterministic seed"
+								title="Gradient and Seed"
+								subtitle="Choose a gradient preset, or Off to keep your current colors"
 							>
 								<div className="grid gap-3 sm:grid-cols-2">
 									<GlobalProfileControl
-										title="Palette Profile"
-										subtitle="Overall color mood and contrast mix"
+										title="Gradient Preset"
+										subtitle="Off, curated gradient presets, or custom"
 										group="palette"
 										presetCatalog={presetCatalog}
 										presetSelections={presetSelections}
 										onApplyProfile={applyPreset}
-										onSaveProfile={saveCustomPreset}
+										tone={menuTone}
 									/>
 									<GlobalProfileControl
-										title="Seed Profile"
+										title="Seed Preset"
 										subtitle="Deterministic seed strategy and lock behavior"
 										group="seed"
 										presetCatalog={presetCatalog}
 										presetSelections={presetSelections}
 										onApplyProfile={applyPreset}
-										onSaveProfile={saveCustomPreset}
+										tone={menuTone}
 									/>
 								</div>
 
@@ -412,18 +587,21 @@ export function GradientSandbox() {
 									onAdd={addPaletteColor}
 									onRemove={removePaletteColor}
 									onToggle={togglePaletteColor}
+									onToggleLock={togglePaletteLock}
 									onHexChange={setPaletteHex}
 									onWeightChange={setPaletteWeight}
 									onRebalance={rebalancePalette}
+									onSaveCustom={() => saveCustomPreset('palette')}
+									tone={menuTone}
 								/>
 
-								<div className="rounded-xl border border-white/12 bg-slate-950/40 p-3">
+								<div className="rounded-xl border border-white/12 bg-slate-950/40 p-4">
 									<ToggleInput
 										label="Lock Deterministic Seed"
 										checked={settings.seedLocked}
 										onChange={(value) => updateSetting('seedLocked', value)}
 									/>
-									<label className="mt-3 block text-[11px] uppercase tracking-[0.16em] text-slate-300/80">
+									<label className="mt-4 block text-[11px] uppercase tracking-[0.16em] text-slate-300/80">
 										<span>Seed Token</span>
 										<input
 											type="text"
@@ -434,7 +612,7 @@ export function GradientSandbox() {
 											className="mt-1.5 w-full rounded-xl border border-white/20 bg-slate-950/80 px-3 py-2 text-sm normal-case tracking-normal text-white outline-none transition focus:border-cyan-300/70"
 										/>
 									</label>
-									<div className="mt-3 grid gap-2 sm:grid-cols-2">
+									<div className="mt-4 grid gap-2 sm:grid-cols-3">
 										<button
 											type="button"
 											onClick={randomizeSeed}
@@ -449,6 +627,17 @@ export function GradientSandbox() {
 										>
 											Reset Defaults
 										</button>
+										<button
+											type="button"
+											onClick={() => saveCustomPreset('seed')}
+											className={`w-full cursor-pointer rounded-xl border px-3 py-2 text-xs font-semibold uppercase tracking-[0.14em] transition ${
+												isLightMenu
+													? 'border-cyan-300 bg-cyan-100 text-cyan-700 hover:bg-cyan-200'
+													: 'border-cyan-300/30 bg-cyan-500/15 text-cyan-100 hover:bg-cyan-500/25'
+											}`}
+										>
+											Save Seed Custom
+										</button>
 									</div>
 								</div>
 							</PanelSection>
@@ -459,29 +648,54 @@ export function GradientSandbox() {
 							>
 								<div className="grid gap-3 sm:grid-cols-2">
 									<GlobalProfileControl
-										title="Layout Profile"
+										title="Layout Preset"
 										subtitle="Density and radius distribution"
 										group="layout"
 										presetCatalog={presetCatalog}
 										presetSelections={presetSelections}
 										onApplyProfile={applyPreset}
-										onSaveProfile={saveCustomPreset}
+										tone={menuTone}
 									/>
 									<GlobalProfileControl
-										title="Motion Profile"
+										title="Motion Preset"
 										subtitle="Animation energy and drift cadence"
 										group="motion"
 										presetCatalog={presetCatalog}
 										presetSelections={presetSelections}
 										onApplyProfile={applyPreset}
-										onSaveProfile={saveCustomPreset}
+										tone={menuTone}
 									/>
+								</div>
+
+								<div className="grid gap-2 sm:grid-cols-2">
+									<button
+										type="button"
+										onClick={() => saveCustomPreset('layout')}
+										className={`w-full cursor-pointer rounded-xl border px-3 py-2 text-xs font-semibold uppercase tracking-[0.12em] transition ${
+											isLightMenu
+												? 'border-cyan-300 bg-cyan-100 text-cyan-700 hover:bg-cyan-200'
+												: 'border-cyan-300/30 bg-cyan-500/15 text-cyan-100 hover:bg-cyan-500/25'
+										}`}
+									>
+										Save Layout Custom
+									</button>
+									<button
+										type="button"
+										onClick={() => saveCustomPreset('motion')}
+										className={`w-full cursor-pointer rounded-xl border px-3 py-2 text-xs font-semibold uppercase tracking-[0.12em] transition ${
+											isLightMenu
+												? 'border-cyan-300 bg-cyan-100 text-cyan-700 hover:bg-cyan-200'
+												: 'border-cyan-300/30 bg-cyan-500/15 text-cyan-100 hover:bg-cyan-500/25'
+										}`}
+									>
+										Save Motion Custom
+									</button>
 								</div>
 
 								<RangeInput
 									label="Circle Count"
 									value={settings.circleCount}
-									min={10}
+									min={1}
 									max={30}
 									onChange={(value) => updateSetting('circleCount', value)}
 								/>
@@ -1112,7 +1326,11 @@ export function GradientSandbox() {
 				<button
 					type="button"
 					onClick={() => setControlsOpen(true)}
-					className="absolute right-4 top-4 z-30 cursor-pointer rounded-full border border-white/25 bg-slate-950/75 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-white shadow-[0_10px_30px_rgba(0,0,0,0.35)] transition hover:bg-slate-900/90"
+					className={`absolute right-4 top-4 z-30 cursor-pointer rounded-full border px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] shadow-[0_10px_30px_rgba(0,0,0,0.35)] transition-colors duration-500 ${
+						isLightMenu
+							? 'border-slate-300 bg-white/90 text-slate-700 hover:bg-white'
+							: 'border-white/25 bg-slate-950/75 text-white hover:bg-slate-900/90'
+					}`}
 				>
 					Show Controls
 				</button>

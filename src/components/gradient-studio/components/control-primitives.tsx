@@ -14,22 +14,22 @@ export function PanelSection({
 	return (
 		<details
 			open={defaultOpen}
-			className="group rounded-2xl border border-white/15 bg-slate-900/55 p-4 shadow-[0_8px_24px_rgba(0,0,0,0.2)]"
+			className="group rounded-2xl border border-white/15 bg-slate-900/55 p-5 shadow-[0_8px_24px_rgba(0,0,0,0.2)]"
 		>
-			<summary className="flex cursor-pointer list-none items-center justify-between gap-3">
+			<summary className="flex cursor-pointer list-none items-center justify-between gap-4">
 				<div>
 					<p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-cyan-100/85">
 						{title}
 					</p>
 					{subtitle ? (
-						<p className="mt-1 text-xs text-slate-300/75">{subtitle}</p>
+						<p className="mt-1.5 text-xs text-slate-300/75">{subtitle}</p>
 					) : null}
 				</div>
 				<span className="text-slate-300 transition group-open:rotate-90">
 					▸
 				</span>
 			</summary>
-			<div className="mt-4 space-y-3">{children}</div>
+			<div className="mt-5 space-y-4">{children}</div>
 		</details>
 	);
 }
@@ -42,7 +42,7 @@ export function LabelValue({
 	value: string | number;
 }) {
 	return (
-		<div className="mb-1.5 flex items-center justify-between text-[11px] uppercase tracking-[0.16em] text-slate-300/80">
+		<div className="mb-2 flex items-center justify-between text-[11px] uppercase tracking-[0.16em] text-slate-300/80">
 			<span>{label}</span>
 			<span className="font-mono text-[12px] normal-case tracking-normal text-white/95">
 				{value}
@@ -156,18 +156,32 @@ export function TinyStat({
 	label,
 	value,
 	colorClass,
+	tone = 'dark',
 }: {
 	label: string;
 	value: string;
 	colorClass?: string;
+	tone?: 'dark' | 'light';
 }) {
+	const isLight = tone === 'light';
+
 	return (
-		<div className="rounded-xl border border-white/15 bg-slate-900/65 px-3 py-2">
-			<p className="text-[10px] uppercase tracking-[0.14em] text-slate-400">
+		<div
+			className={`rounded-xl border px-3 py-2 transition-colors duration-500 ${
+				isLight
+					? 'border-slate-300 bg-white/85'
+					: 'border-white/15 bg-slate-900/65'
+			}`}
+		>
+			<p
+				className={`text-[10px] uppercase tracking-[0.14em] ${
+					isLight ? 'text-slate-500' : 'text-slate-400'
+				}`}
+			>
 				{label}
 			</p>
 			<p
-				className={`mt-1 text-sm font-semibold ${colorClass ?? 'text-white/95'}`}
+				className={`mt-1 text-sm font-semibold ${colorClass ?? (isLight ? 'text-slate-900' : 'text-white/95')}`}
 			>
 				{value}
 			</p>

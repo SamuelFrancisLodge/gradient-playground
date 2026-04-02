@@ -9,6 +9,7 @@ export type PaletteSwatch = {
 	hex: string;
 	weight: number;
 	enabled: boolean;
+	locked: boolean;
 };
 
 export type StudioSettings = {

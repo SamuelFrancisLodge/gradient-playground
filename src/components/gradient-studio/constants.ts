@@ -15,6 +15,7 @@ function paletteFromHexes(hexes: string[]): PaletteSwatch[] {
 		hex,
 		weight: even,
 		enabled: true,
+		locked: false,
 	}));
 }
 
@@ -25,24 +26,9 @@ export const SHAPE_OPTIONS: ShapeOption[] = [
 		help: 'Classic soft orb forms.',
 	},
 	{
-		label: 'Square',
-		value: 'square',
-		help: 'Rounded geometric blocks.',
-	},
-	{
-		label: 'Rectangle',
-		value: 'rect',
-		help: 'Directional elongated forms.',
-	},
-	{
-		label: 'Abstract Sharp',
-		value: 'abstract-sharp',
-		help: 'Faceted and angular shapes.',
-	},
-	{
-		label: 'Abstract Curved',
+		label: 'Organic Blob',
 		value: 'abstract-curved',
-		help: 'Organic curved blobs.',
+		help: 'Soft fluid blob-like shapes.',
 	},
 ];
 
@@ -124,7 +110,7 @@ export const PRESET_CATALOG: PresetCatalog = {
 			key: 'style-bloom-atmosphere',
 			label: 'Bloom Atmosphere',
 			description:
-				'Use-case: soft cinematic bloom and glow with large atmospheric forms.',
+				'Soft cinematic bloom and glow with large atmospheric forms.',
 			patch: {
 				circleCount: 18,
 				minRadius: 150,
@@ -171,14 +157,13 @@ export const PRESET_CATALOG: PresetCatalog = {
 		{
 			key: 'style-poster-punch',
 			label: 'Poster Punch',
-			description:
-				'Use-case: hard posterized graphic look with minimal blending.',
+			description: 'Hard posterized graphic look with minimal blending.',
 			patch: {
 				circleCount: 14,
 				minRadius: 120,
 				maxRadius: 620,
 				allowCrop: false,
-				shapeSelections: ['square', 'rect', 'abstract-sharp'],
+				shapeSelections: ['circle', 'abstract-curved'],
 				animate: false,
 				animationSpeed: 1,
 				movementIntensity: 0,
@@ -207,14 +192,13 @@ export const PRESET_CATALOG: PresetCatalog = {
 		{
 			key: 'style-prism-fringe',
 			label: 'Prism Fringe',
-			description:
-				'Use-case: chromatic edge split with sweep light and crisp contrast.',
+			description: 'Chromatic edge split with sweep light and crisp contrast.',
 			patch: {
 				circleCount: 20,
 				minRadius: 96,
 				maxRadius: 560,
 				allowCrop: true,
-				shapeSelections: ['circle', 'rect', 'abstract-sharp'],
+				shapeSelections: ['circle', 'abstract-curved'],
 				animate: true,
 				animationSpeed: 1.2,
 				movementIntensity: 1.1,
@@ -261,7 +245,7 @@ export const PRESET_CATALOG: PresetCatalog = {
 			key: 'style-liquid-warp',
 			label: 'Liquid Warp',
 			description:
-				'Use-case: fluid distortion with metaball fusion and refractive texture.',
+				'Fluid distortion with metaball fusion and refractive texture.',
 			patch: {
 				circleCount: 22,
 				minRadius: 120,
@@ -321,7 +305,7 @@ export const PRESET_CATALOG: PresetCatalog = {
 			key: 'style-editorial-grain',
 			label: 'Editorial Grain',
 			description:
-				'Use-case: moody print-style grain with restrained motion and deep vignette.',
+				'Moody print-style grain with restrained motion and deep vignette.',
 			patch: {
 				circleCount: 16,
 				minRadius: 150,
@@ -365,13 +349,13 @@ export const PRESET_CATALOG: PresetCatalog = {
 			key: 'style-caustic-glass',
 			label: 'Caustic Glass',
 			description:
-				'Use-case: energetic glassy lighting with caustics, sweep, and bold depth.',
+				'Energetic glassy lighting with caustics, sweep, and bold depth.',
 			patch: {
 				circleCount: 24,
 				minRadius: 110,
 				maxRadius: 680,
 				allowCrop: true,
-				shapeSelections: ['circle', 'rect', 'abstract-curved'],
+				shapeSelections: ['circle', 'abstract-curved'],
 				animate: true,
 				animationSpeed: 1.35,
 				movementIntensity: 1.25,
@@ -462,7 +446,7 @@ export const PRESET_CATALOG: PresetCatalog = {
 			label: 'Geometric Board',
 			description: 'Shape-forward scene with harder primitives.',
 			patch: {
-				shapeSelections: ['square', 'rect', 'abstract-sharp'],
+				shapeSelections: ['circle', 'abstract-curved'],
 				circleCount: 24,
 				minRadius: 110,
 				maxRadius: 380,
@@ -470,6 +454,14 @@ export const PRESET_CATALOG: PresetCatalog = {
 		},
 	],
 	motion: [
+		{
+			key: 'motion-off',
+			label: 'Off',
+			description: 'Disable animation and hold a still frame.',
+			patch: {
+				animate: false,
+			},
+		},
 		{
 			key: 'motion-calm',
 			label: 'Calm Drift',
@@ -509,16 +501,15 @@ export const PRESET_CATALOG: PresetCatalog = {
 				shapeSpeedMax: 2.1,
 			},
 		},
-		{
-			key: 'motion-static',
-			label: 'Static Frame',
-			description: 'Freeze movement for composition checks.',
-			patch: {
-				animate: false,
-			},
-		},
 	],
 	palette: [
+		{
+			key: 'palette-none',
+			label: 'Off',
+			description:
+				'Keep current manual colors without applying a palette preset.',
+			patch: {},
+		},
 		{
 			key: 'palette-cyan-amber',
 			label: 'Cyan + Amber',
@@ -731,6 +722,118 @@ export const PRESET_CATALOG: PresetCatalog = {
 			},
 		},
 		{
+			key: 'palette-volcanic-ash',
+			label: 'Volcanic Ash',
+			description: 'Smoky charcoals with ember reds and glowing orange.',
+			patch: {
+				palette: paletteFromHexes([
+					'#111827',
+					'#374151',
+					'#7f1d1d',
+					'#dc2626',
+					'#f97316',
+				]),
+			},
+		},
+		{
+			key: 'palette-arctic-pastel',
+			label: 'Arctic Pastel',
+			description: 'Icy pastels with soft blue and pink accents.',
+			patch: {
+				palette: paletteFromHexes([
+					'#e0f2fe',
+					'#bae6fd',
+					'#a5b4fc',
+					'#fbcfe8',
+					'#f0f9ff',
+				]),
+			},
+		},
+		{
+			key: 'palette-rainforest-deep',
+			label: 'Rainforest Deep',
+			description: 'Dense jungle greens with moss and dark canopy contrast.',
+			patch: {
+				palette: paletteFromHexes([
+					'#052e16',
+					'#14532d',
+					'#166534',
+					'#4d7c0f',
+					'#bbf7d0',
+				]),
+			},
+		},
+		{
+			key: 'palette-retro-arcade',
+			label: 'Retro Arcade',
+			description: 'Electric magenta, cyan, and yellow with deep violet base.',
+			patch: {
+				palette: paletteFromHexes([
+					'#1e1b4b',
+					'#7c3aed',
+					'#ec4899',
+					'#22d3ee',
+					'#fde047',
+				]),
+			},
+		},
+		{
+			key: 'palette-lilac-dream',
+			label: 'Lilac Dream',
+			description: 'Lavender gradients with rosy and sky highlights.',
+			patch: {
+				palette: paletteFromHexes([
+					'#312e81',
+					'#6366f1',
+					'#a78bfa',
+					'#f5d0fe',
+					'#bae6fd',
+				]),
+			},
+		},
+		{
+			key: 'palette-royal-gold',
+			label: 'Royal Gold',
+			description: 'Navy and royal blues balanced with rich gold highlights.',
+			patch: {
+				palette: paletteFromHexes([
+					'#0f172a',
+					'#1d4ed8',
+					'#1e40af',
+					'#f59e0b',
+					'#fef3c7',
+				]),
+			},
+		},
+		{
+			key: 'palette-coastal-sunrise',
+			label: 'Coastal Sunrise',
+			description: 'Sea blue mixed with coral sunrise tones.',
+			patch: {
+				palette: paletteFromHexes([
+					'#0c4a6e',
+					'#0284c7',
+					'#22d3ee',
+					'#fb7185',
+					'#fdba74',
+				]),
+			},
+		},
+		{
+			key: 'palette-copper-oxide',
+			label: 'Copper Oxide',
+			description: 'Weathered copper oranges and teal patina contrast.',
+			patch: {
+				palette: paletteFromHexes([
+					'#7c2d12',
+					'#c2410c',
+					'#ea580c',
+					'#0f766e',
+					'#99f6e4',
+				]),
+			},
+		},
+		{
 			key: 'palette-gray',
 			label: 'Slate Mono',
 			description: 'Neutral minimalist grayscale.',
@@ -797,7 +900,7 @@ export const EFFECT_PRESET_CATALOG: EffectPresetCatalog = {
 	blur: [
 		{
 			key: 'blur-off',
-			label: 'None',
+			label: 'Off',
 			description: 'Disable blur.',
 			patch: {
 				blurEnabled: false,
@@ -834,7 +937,7 @@ export const EFFECT_PRESET_CATALOG: EffectPresetCatalog = {
 	glow: [
 		{
 			key: 'glow-off',
-			label: 'None',
+			label: 'Off',
 			description: 'Disable glow pass.',
 			patch: {
 				glowEnabled: false,
@@ -877,7 +980,7 @@ export const EFFECT_PRESET_CATALOG: EffectPresetCatalog = {
 	noise: [
 		{
 			key: 'noise-off',
-			label: 'None',
+			label: 'Off',
 			description: 'Disable all noise overlays.',
 			patch: {
 				noiseEnabled: false,
@@ -923,7 +1026,7 @@ export const EFFECT_PRESET_CATALOG: EffectPresetCatalog = {
 	warp: [
 		{
 			key: 'warp-off',
-			label: 'None',
+			label: 'Off',
 			description: 'Disable liquid warp distortion.',
 			patch: {
 				warpEnabled: false,
@@ -966,7 +1069,7 @@ export const EFFECT_PRESET_CATALOG: EffectPresetCatalog = {
 	metaball: [
 		{
 			key: 'metaball-off',
-			label: 'None',
+			label: 'Off',
 			description: 'Disable shape fusion.',
 			patch: {
 				metaballEnabled: false,
@@ -1006,7 +1109,7 @@ export const EFFECT_PRESET_CATALOG: EffectPresetCatalog = {
 	bloom: [
 		{
 			key: 'bloom-off',
-			label: 'None',
+			label: 'Off',
 			description: 'Disable bloom pass.',
 			patch: {
 				bloomEnabled: false,
@@ -1049,7 +1152,7 @@ export const EFFECT_PRESET_CATALOG: EffectPresetCatalog = {
 	posterize: [
 		{
 			key: 'posterize-off',
-			label: 'None',
+			label: 'Off',
 			description: 'Disable posterize effect.',
 			patch: {
 				posterizeEnabled: false,
@@ -1089,7 +1192,7 @@ export const EFFECT_PRESET_CATALOG: EffectPresetCatalog = {
 	caustic: [
 		{
 			key: 'caustic-off',
-			label: 'None',
+			label: 'Off',
 			description: 'Disable caustic highlights.',
 			patch: {
 				causticEnabled: false,
@@ -1132,7 +1235,7 @@ export const EFFECT_PRESET_CATALOG: EffectPresetCatalog = {
 	depth: [
 		{
 			key: 'depth-off',
-			label: 'None',
+			label: 'Off',
 			description: 'Disable depth layering.',
 			patch: {
 				depthEnabled: false,
@@ -1172,7 +1275,7 @@ export const EFFECT_PRESET_CATALOG: EffectPresetCatalog = {
 	fringe: [
 		{
 			key: 'fringe-off',
-			label: 'None',
+			label: 'Off',
 			description: 'Disable chromatic fringe.',
 			patch: {
 				fringeEnabled: false,
@@ -1209,7 +1312,7 @@ export const EFFECT_PRESET_CATALOG: EffectPresetCatalog = {
 	sweep: [
 		{
 			key: 'sweep-off',
-			label: 'None',
+			label: 'Off',
 			description: 'Disable light sweep.',
 			patch: {
 				sweepEnabled: false,
@@ -1255,7 +1358,7 @@ export const EFFECT_PRESET_CATALOG: EffectPresetCatalog = {
 	vignette: [
 		{
 			key: 'vignette-off',
-			label: 'None',
+			label: 'Off',
 			description: 'Disable vignette darkening.',
 			patch: {
 				vignetteEnabled: false,
@@ -1295,7 +1398,7 @@ export const EFFECT_PRESET_CATALOG: EffectPresetCatalog = {
 	paletteDrift: [
 		{
 			key: 'palette-drift-off',
-			label: 'None',
+			label: 'Off',
 			description: 'Disable animated hue drift.',
 			patch: {
 				paletteDriftEnabled: false,
@@ -1332,7 +1435,7 @@ export const EFFECT_PRESET_CATALOG: EffectPresetCatalog = {
 	hueRotate: [
 		{
 			key: 'hue-rotate-off',
-			label: 'None',
+			label: 'Off',
 			description: 'Disable hue rotation.',
 			patch: {
 				hueRotateEnabled: false,
@@ -1374,7 +1477,11 @@ export const EFFECT_PRESET_CATALOG: EffectPresetCatalog = {
 export const DEFAULT_PRESET_SELECTIONS: PresetSelectionState = {
 	style: PRESET_CATALOG.style[0]?.key ?? '',
 	layout: PRESET_CATALOG.layout[0]?.key ?? '',
-	motion: PRESET_CATALOG.motion[1]?.key ?? '',
+	motion:
+		PRESET_CATALOG.motion.find((entry) => entry.key === 'motion-balanced')
+			?.key ??
+		PRESET_CATALOG.motion[0]?.key ??
+		'',
 	palette: PRESET_CATALOG.palette[0]?.key ?? '',
 	seed: PRESET_CATALOG.seed[0]?.key ?? '',
 };

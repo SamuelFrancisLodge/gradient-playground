@@ -69,7 +69,9 @@ export function normalizePaletteWeights(
 
 	const safe = palette.map((swatch) => ({
 		...swatch,
-		weight: Number.isFinite(swatch.weight) ? Math.max(0.01, swatch.weight) : 1,
+		enabled: swatch.enabled !== false,
+		locked: swatch.locked === true,
+		weight: Number.isFinite(swatch.weight) ? Math.max(0, swatch.weight) : 1,
 	}));
 	const total = safe.reduce((sum, swatch) => sum + swatch.weight, 0);
 
@@ -92,12 +94,17 @@ export function ensureVisiblePalette(
 	}
 
 	if (palette.some((swatch) => swatch.enabled)) {
-		return palette;
+		return palette.map((swatch) => ({
+			...swatch,
+			enabled: swatch.enabled !== false,
+			locked: swatch.locked === true,
+		}));
 	}
 
 	return palette.map((swatch, index) => ({
 		...swatch,
 		enabled: index === 0,
+		locked: swatch.locked === true,
 	}));
 }
 
@@ -134,7 +141,7 @@ export function patchSettings(
 
 	const safeMinRadius = Math.min(merged.minRadius, merged.maxRadius - 8);
 	const safeMaxRadius = Math.max(merged.maxRadius, safeMinRadius + 8);
-	const safeCircleCount = Math.round(clamp(merged.circleCount, 10, 30));
+	const safeCircleCount = Math.round(clamp(merged.circleCount, 1, 30));
 	const safeShapeSpeedMin = Math.min(
 		merged.shapeSpeedMin,
 		merged.shapeSpeedMax,

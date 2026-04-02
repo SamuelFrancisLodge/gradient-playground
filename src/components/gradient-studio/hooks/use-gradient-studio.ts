@@ -55,7 +55,11 @@ const PRESET_GROUP_SETTING_KEYS: Record<
 	PresetGroupKey,
 	Array<keyof StudioSettings>
 > = {
-	style: Object.keys(DEFAULT_STUDIO_SETTINGS) as Array<keyof StudioSettings>,
+	style: (
+		Object.keys(DEFAULT_STUDIO_SETTINGS) as Array<keyof StudioSettings>
+	).filter(
+		(key) => key !== 'palette' && key !== 'seed' && key !== 'seedLocked',
+	),
 	layout: [
 		'circleCount',
 		'minRadius',
@@ -333,13 +337,148 @@ function findEffectPresetPatch(
 	return preset ? preset.patch : null;
 }
 
-function equalWeightPalette(palette: PaletteSwatch[]): PaletteSwatch[] {
-	if (palette.length === 0) {
-		return [];
+const WEIGHT_EPSILON = 0.000001;
+
+function clampWeight(value: number): number {
+	return Math.min(1, Math.max(0, value));
+}
+
+function rebalanceUnlockedWeights(palette: PaletteSwatch[]): {
+	palette: PaletteSwatch[] | null;
+	message?: string;
+} {
+	const lockedSum = palette.reduce(
+		(sum, swatch) => sum + (swatch.locked ? swatch.weight : 0),
+		0,
+	);
+
+	if (lockedSum > 1 + WEIGHT_EPSILON) {
+		return {
+			palette: null,
+			message:
+				'Locked ratios exceed 100%. Unlock a color or reduce locked ratios.',
+		};
 	}
 
-	const even = 1 / palette.length;
-	return palette.map((swatch) => ({ ...swatch, weight: even }));
+	const unlockedIndexes = palette
+		.map((swatch, index) => ({ swatch, index }))
+		.filter(({ swatch }) => !swatch.locked)
+		.map(({ index }) => index);
+
+	if (unlockedIndexes.length === 0) {
+		return {
+			palette: palette.map((swatch) => ({ ...swatch })),
+			message: 'All ratios are locked. Unlock one color to rebalance.',
+		};
+	}
+
+	const remaining = Math.max(0, 1 - lockedSum);
+	const even = remaining / unlockedIndexes.length;
+	const next = palette.map((swatch, index) =>
+		unlockedIndexes.includes(index)
+			? { ...swatch, weight: even }
+			: { ...swatch },
+	);
+
+	if (remaining <= WEIGHT_EPSILON) {
+		return {
+			palette: next,
+			message:
+				'Locked ratios already use 100%. Unlocked colors were set to 0%.',
+		};
+	}
+
+	return { palette: next };
+}
+
+function updatePaletteWeightWithLocks(
+	palette: PaletteSwatch[],
+	id: string,
+	requestedWeight: number,
+): {
+	palette: PaletteSwatch[] | null;
+	message?: string;
+} {
+	if (!Number.isFinite(requestedWeight)) {
+		return {
+			palette: null,
+			message: 'Enter a valid ratio value.',
+		};
+	}
+
+	const targetIndex = palette.findIndex((swatch) => swatch.id === id);
+	if (targetIndex < 0) {
+		return {
+			palette: null,
+			message: 'Color ratio target was not found.',
+		};
+	}
+
+	const next = palette.map((swatch) => ({ ...swatch }));
+	const lockedOtherSum = next.reduce((sum, swatch, index) => {
+		if (index === targetIndex || !swatch.locked) {
+			return sum;
+		}
+
+		return sum + swatch.weight;
+	}, 0);
+
+	const maxForTarget = Math.max(0, 1 - lockedOtherSum);
+	const clampedTarget = Math.min(clampWeight(requestedWeight), maxForTarget);
+	next[targetIndex].weight = clampedTarget;
+
+	const adjustableIndexes = next
+		.map((swatch, index) => ({ swatch, index }))
+		.filter(({ swatch, index }) => index !== targetIndex && !swatch.locked)
+		.map(({ index }) => index);
+
+	const remaining = 1 - lockedOtherSum - clampedTarget;
+
+	if (adjustableIndexes.length === 0) {
+		if (Math.abs(remaining) > WEIGHT_EPSILON) {
+			return {
+				palette: null,
+				message:
+					'No unlocked colors are available to absorb the remaining ratio. Unlock at least one other color.',
+			};
+		}
+
+		if (Math.abs(clampedTarget - requestedWeight) > WEIGHT_EPSILON) {
+			return {
+				palette: next,
+				message: `Ratio capped at ${(clampedTarget * 100).toFixed(1)}% because locked colors reserve the rest.`,
+			};
+		}
+
+		return { palette: next };
+	}
+
+	const adjustableTotal = adjustableIndexes.reduce(
+		(sum, index) => sum + next[index].weight,
+		0,
+	);
+	const safeRemaining = Math.max(0, remaining);
+
+	if (adjustableTotal <= WEIGHT_EPSILON) {
+		const even = safeRemaining / adjustableIndexes.length;
+		for (const index of adjustableIndexes) {
+			next[index].weight = even;
+		}
+	} else {
+		for (const index of adjustableIndexes) {
+			next[index].weight =
+				safeRemaining * (next[index].weight / adjustableTotal);
+		}
+	}
+
+	if (Math.abs(clampedTarget - requestedWeight) > WEIGHT_EPSILON) {
+		return {
+			palette: next,
+			message: `Ratio capped at ${(clampedTarget * 100).toFixed(1)}% because locked colors reserve the rest.`,
+		};
+	}
+
+	return { palette: next };
 }
 
 export function useGradientStudioState() {
@@ -462,13 +601,13 @@ export function useGradientStudioState() {
 			applyPatch(patch);
 
 			if (key === CUSTOM_PRESET_KEY) {
-				setStatusMessage(`Applied custom ${group} profile.`);
+				setStatusMessage(`Applied custom ${group} preset.`);
 				return;
 			}
 
 			const selected = PRESET_CATALOG[group].find((entry) => entry.key === key);
 			if (selected) {
-				setStatusMessage(`Applied ${group} profile: ${selected.label}.`);
+				setStatusMessage(`Applied ${group} preset: ${selected.label}.`);
 			}
 		},
 		[applyPatch, customPresets],
@@ -507,7 +646,7 @@ export function useGradientStudioState() {
 			applyPatch(patch);
 
 			if (key === CUSTOM_PRESET_KEY) {
-				setStatusMessage(`Applied custom ${effect} profile.`);
+				setStatusMessage(`Applied custom ${effect} preset.`);
 				return;
 			}
 
@@ -515,7 +654,7 @@ export function useGradientStudioState() {
 				(entry) => entry.key === key,
 			);
 			if (selected) {
-				setStatusMessage(`Applied ${effect} profile: ${selected.label}.`);
+				setStatusMessage(`Applied ${effect} preset: ${selected.label}.`);
 			}
 		},
 		[applyPatch, customEffectPresets],
@@ -536,7 +675,7 @@ export function useGradientStudioState() {
 				...current,
 				[group]: CUSTOM_PRESET_KEY,
 			}));
-			setStatusMessage(`Saved custom ${group} profile.`);
+			setStatusMessage(`Saved custom ${group} preset.`);
 		},
 		[settings],
 	);
@@ -556,7 +695,7 @@ export function useGradientStudioState() {
 				...current,
 				[effect]: CUSTOM_PRESET_KEY,
 			}));
-			setStatusMessage(`Saved custom ${effect} profile.`);
+			setStatusMessage(`Saved custom ${effect} preset.`);
 		},
 		[settings],
 	);
@@ -585,20 +724,27 @@ export function useGradientStudioState() {
 	);
 
 	const addPaletteColor = useCallback(() => {
-		const nextPalette = equalWeightPalette([
+		const withNewColor = [
 			...settings.palette,
 			{
 				id: createId('palette'),
 				hex: randomPaletteHex(),
-				weight: 1,
+				weight: 0,
 				enabled: true,
+				locked: false,
 			},
-		]);
+		];
 
-		const patch: StudioPatch = { palette: nextPalette };
+		const result = rebalanceUnlockedWeights(withNewColor);
+		if (!result.palette) {
+			setStatusMessage(result.message ?? 'Could not add color right now.');
+			return;
+		}
+
+		const patch: StudioPatch = { palette: result.palette };
 		applyPatch(patch);
 		markCustomFromPatch(patch);
-		setStatusMessage('Added a new palette color.');
+		setStatusMessage(result.message ?? 'Added a new palette color.');
 	}, [applyPatch, markCustomFromPatch, settings.palette]);
 
 	const removePaletteColor = useCallback(
@@ -608,12 +754,21 @@ export function useGradientStudioState() {
 				return;
 			}
 
-			const nextPalette = equalWeightPalette(
-				settings.palette.filter((swatch) => swatch.id !== id),
+			const reducedPalette = settings.palette.filter(
+				(swatch) => swatch.id !== id,
 			);
-			const patch: StudioPatch = { palette: nextPalette };
+			const result = rebalanceUnlockedWeights(reducedPalette);
+			if (!result.palette) {
+				setStatusMessage(result.message ?? 'Could not remove that color.');
+				return;
+			}
+
+			const patch: StudioPatch = { palette: result.palette };
 			applyPatch(patch);
 			markCustomFromPatch(patch);
+			if (result.message) {
+				setStatusMessage(result.message);
+			}
 		},
 		[applyPatch, markCustomFromPatch, settings.palette],
 	);
@@ -653,23 +808,59 @@ export function useGradientStudioState() {
 
 	const setPaletteWeight = useCallback(
 		(id: string, weight: number) => {
+			const result = updatePaletteWeightWithLocks(settings.palette, id, weight);
+			if (!result.palette) {
+				setStatusMessage(result.message ?? 'Could not set that ratio.');
+				return;
+			}
+
+			const patch: StudioPatch = { palette: result.palette };
+			applyPatch(patch);
+			markCustomFromPatch(patch);
+			if (result.message) {
+				setStatusMessage(result.message);
+			}
+		},
+		[applyPatch, markCustomFromPatch, settings.palette],
+	);
+
+	const togglePaletteLock = useCallback(
+		(id: string, locked: boolean) => {
 			const nextPalette = settings.palette.map((swatch) =>
-				swatch.id === id ? { ...swatch, weight } : swatch,
+				swatch.id === id ? { ...swatch, locked } : swatch,
 			);
+
 			const patch: StudioPatch = { palette: nextPalette };
 			applyPatch(patch);
 			markCustomFromPatch(patch);
+
+			const target = nextPalette.find((swatch) => swatch.id === id);
+			if (!target) {
+				return;
+			}
+
+			setStatusMessage(
+				locked
+					? `Locked ratio for ${target.hex.toUpperCase()}.`
+					: `Unlocked ratio for ${target.hex.toUpperCase()}.`,
+			);
 		},
 		[applyPatch, markCustomFromPatch, settings.palette],
 	);
 
 	const rebalancePalette = useCallback(() => {
+		const result = rebalanceUnlockedWeights(settings.palette);
+		if (!result.palette) {
+			setStatusMessage(result.message ?? 'Could not rebalance palette ratios.');
+			return;
+		}
+
 		const patch: StudioPatch = {
-			palette: equalWeightPalette(settings.palette),
+			palette: result.palette,
 		};
 		applyPatch(patch);
 		markCustomFromPatch(patch);
-		setStatusMessage('Rebalanced palette weights.');
+		setStatusMessage(result.message ?? 'Rebalanced palette weights.');
 	}, [applyPatch, markCustomFromPatch, settings.palette]);
 
 	const randomizeSeed = useCallback(() => {
@@ -757,6 +948,7 @@ export function useGradientStudioState() {
 		addPaletteColor,
 		removePaletteColor,
 		togglePaletteColor,
+		togglePaletteLock,
 		setPaletteHex,
 		setPaletteWeight,
 		rebalancePalette,
